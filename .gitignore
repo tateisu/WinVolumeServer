@@ -482,3 +482,4 @@ lint/tmp/
 # private things
 
 androidSignKey.jks
+*.zip
