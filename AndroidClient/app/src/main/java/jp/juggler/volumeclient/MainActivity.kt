@@ -2,7 +2,6 @@ package jp.juggler.volumeclient
 
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
 import android.widget.SeekBar
@@ -10,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.postDelayed
 import androidx.core.widget.addTextChangedListener
 import jp.juggler.volumeclient.MainActivityViewModel.Companion.seekBarPositionToVolumeDb
+import jp.juggler.volumeclient.Utils.getAttrColor
 import jp.juggler.volumeclient.Utils.provideViewModel
 import jp.juggler.volumeclient.Utils.vg
 import jp.juggler.volumeclient.databinding.ActivityMainBinding
@@ -81,7 +81,23 @@ class MainActivity : AppCompatActivity() {
             updatePresets(it)
         }
         error.observe(activity) {
-            views.etError.setText(it ?: "")
+            views.etError.run {
+                if (it == null) {
+                    setText("")
+                    setTextColor(getAttrColor(R.attr.colorEditTextNormal))
+                } else {
+                    setText(it.toString(applicationContext))
+                    setTextColor(
+                        getAttrColor(
+                            if (it.resId == R.string.connected) {
+                                R.attr.colorEditTextNormal
+                            } else {
+                                R.attr.colorEditTextError
+                            }
+                        )
+                    )
+                }
+            }
         }
         deviceName.observe(activity) {
             views.tvDeviceName.text = it ?: ""

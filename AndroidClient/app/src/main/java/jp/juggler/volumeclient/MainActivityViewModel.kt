@@ -42,7 +42,7 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     val password = MutableLiveData<String>()
     val volumeBarPos = MutableLiveData<Int>()
     val volumeDb = MutableLiveData<Float>()
-    val error = MutableLiveData<String>()
+    val error = MutableLiveData<StringResAndArgs>()
     val presets = MutableLiveData<List<Float>>()
     val deviceName = MutableLiveData<String>()
 

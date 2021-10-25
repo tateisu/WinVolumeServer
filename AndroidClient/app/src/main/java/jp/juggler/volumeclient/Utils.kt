@@ -1,7 +1,13 @@
 package jp.juggler.volumeclient
 
+import android.content.Context
+import android.graphics.Color
 import android.util.Base64
+import android.util.TypedValue
 import android.view.View
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -20,7 +26,10 @@ import kotlin.coroutines.resumeWithException
 import kotlin.math.max
 import kotlin.math.min
 
+@Suppress("MemberVisibilityCanBePrivate")
 object Utils {
+    private val log = LogTag("Utils")
+
     // ViewModelのfactoryを毎回書くのが面倒
     // あと使わない場合にはViewModelの引数を生成したくない
     fun <VM : ViewModel> viewModelFactory(vmClass: Class<VM>, creator: () -> VM) =
@@ -75,6 +84,27 @@ object Utils {
             this,
             Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
         )
+
+    fun Context.getResColor(@ColorRes resId: Int) =
+        ContextCompat.getColor(this, resId)
+
+    fun Context.attrToResId(@AttrRes attrId: Int): Int {
+        val outValue = TypedValue()
+        theme.resolveAttribute(attrId, outValue, false)
+        if (outValue.type == TypedValue.TYPE_REFERENCE) {
+            return outValue.data
+        }
+        error("attrToResId. can't resolve. attrId=$attrId")
+    }
+
+    fun Context.getAttrColor(@AttrRes attrId: Int): Int {
+        return try {
+            getResColor(attrToResId(attrId))
+        } catch (ex: Throwable) {
+            log.w(ex, "getAttrColor failed.")
+            Color.MAGENTA;
+        }
+    }
 }
 
 object EmptyScope : CoroutineScope {

@@ -17,11 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 class SequentialUpdater(
-    val onError: (String) -> Unit,
+    val onError: (StringResAndArgs) -> Unit,
     val handleGetResult: (String, Float) -> Unit
 ) {
     companion object {
         private val log = LogTag("SequentialUpdater")
+        private val connected = StringResAndArgs(R.string.connected)
     }
 
     private val client = OkHttpClient()
@@ -71,7 +72,7 @@ class SequentialUpdater(
         val volumeDb = root.optDouble("volume", Double.NaN).toFloat()
         if (!volumeDb.isFinite()) error("can't get volume value. $bodyString")
         withContext(Dispatchers.Main) {
-            onError("")
+            onError(connected)
             handleGetResult(deviceName, volumeDb)
         }
     }
@@ -137,7 +138,7 @@ class SequentialUpdater(
                         "${ex.javaClass.simpleName} ${ex.message}"
                     }
                     withContext(Dispatchers.Main) {
-                        onError(text)
+                        onError(StringResAndArgs.create(R.string.connection_error,text))
                     }
                 }
             }
