@@ -17,6 +17,7 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
         const val keyShowConnectionSettings = "showConnectionSettings"
         const val keyServerAddr = "serverAddr"
         const val keyServerPort = "serverPort"
+        const val keyPassword = "password"
         const val keyPresets = "presets"
 
         private const val minDb = 30
@@ -38,6 +39,7 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     val showConnectionSettings = MutableLiveData<Boolean>()
     val serverAddr = MutableLiveData<String>()
     val serverPort = MutableLiveData<String>()
+    val password = MutableLiveData<String>()
     val volumeBarPos = MutableLiveData<Int>()
     val volumeDb = MutableLiveData<Float>()
     val error = MutableLiveData<String>()
@@ -73,6 +75,7 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
         showConnectionSettings.value = pref.getBoolean(keyShowConnectionSettings, true)
         serverAddr.value = pref.getString(keyServerAddr, "X.X.X.X")
         serverPort.value = pref.getString(keyServerPort, "2021")
+        password.value = pref.getString(keyPassword, "")
         presets.value = pref.getString(keyPresets, null)
             ?.split("/")
             ?.mapNotNull { it.toFloatOrNull() }
@@ -85,19 +88,25 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
             .putBoolean(keyShowConnectionSettings, showConnectionSettings.value ?: true)
             .putString(keyServerAddr, serverAddr.value)
             .putString(keyServerPort, serverPort.value)
+            .putString(keyPassword, password.value)
             .putString(keyPresets, presets.value?.joinToString("/"))
             .apply()
     }
 
-    fun updateServer(addr: String, port: String) {
-        serverAddr.value = addr
-        serverPort.value = port
+    fun setServerConfig(addr: String, port: String, password: String) {
+        if (addr != this.serverAddr.value) this.serverAddr.value = addr
+        if (port != this.serverPort.value) this.serverPort.value = port
+        if (password != this.password.value) this.password.value = password
         postGetCurrentVolume()
     }
 
     fun postGetCurrentVolume() {
         viewModelScope.launch {
-            updater.postGet(serverAddr.value, serverPort.value?.toIntOrNull() ?: 0)
+            updater.postGet(
+                serverAddr.value,
+                serverPort.value?.toIntOrNull() ?: 0,
+                password.value
+            )
         }
     }
 

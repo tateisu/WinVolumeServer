@@ -3,8 +3,10 @@ package jp.juggler.volumeclient
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.postDelayed
 import androidx.core.widget.addTextChangedListener
 import jp.juggler.volumeclient.MainActivityViewModel.Companion.seekBarPositionToVolumeDb
 import jp.juggler.volumeclient.Utils.provideViewModel
@@ -12,7 +14,7 @@ import jp.juggler.volumeclient.Utils.vg
 import jp.juggler.volumeclient.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    private val viewBinding by lazy {
+    private val views by lazy {
         ActivityMainBinding.inflate(layoutInflater, null, false)
     }
     private val viewModel by lazy {
@@ -21,86 +23,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(viewBinding.root)
+        setContentView(views.root)
 
-        viewBinding.sbVolume.apply {
+        views.sbVolume.apply {
             this.max = MainActivityViewModel.seekBarMax
         }
 
         viewModel.loadOrRestore()
 
-        viewModel.showConnectionSettings.observe(this) {
-            if (it != null) {
-                viewBinding.swConnectionSettings.isChecked = it
-                viewBinding.tlConnectionSettings.vg(it)
-            }
-        }
+        viewModel.bindViewModelEvents()
+        views.bindUiEvents()
 
-        viewModel.serverAddr.observe(this) {
-            if (it != null && it != viewBinding.etServerAddr.text.toString()) {
-                viewBinding.etServerAddr.setText(it)
-            }
-        }
-        viewModel.serverPort.observe(this) {
-            if (it != null && it != viewBinding.etServerPort.text.toString()) {
-                viewBinding.etServerPort.setText(it)
-            }
-        }
-        viewModel.volumeBarPos.observe(this) {
-            if (it != null && it != viewBinding.sbVolume.progress) {
-                viewBinding.sbVolume.progress = it
-            }
-        }
-        viewModel.volumeDb.observe(this) {
-            val text = it?.let{"${it}dB"} ?: ""
-            if (text != viewBinding.tvVolume.text.toString()) {
-                viewBinding.tvVolume.text = text
-            }
-        }
-        viewModel.presets.observe(this) {
-            updatePresets(it)
-        }
-        viewModel.error.observe(this) {
-            viewBinding.etError.setText(it ?: "")
-        }
-        viewModel.deviceName.observe(this) {
-            viewBinding.tvDeviceName.text = it ?: ""
-        }
-
-        viewBinding.swConnectionSettings.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.showConnectionSettings.value = isChecked
-        }
-
-        viewBinding.etServerAddr.addTextChangedListener {
-            updateServerDelayed()
-        }
-
-        viewBinding.etServerPort.addTextChangedListener {
-            updateServerDelayed()
-        }
-
-        viewBinding.sbVolume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-            }
-
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                val volumeDb = seekBarPositionToVolumeDb(seekBar.progress)
-                viewModel.setVolume(volumeDb)
-            }
-        })
-
-        viewBinding.btnIncrement.setOnClickListener {
-            viewModel.setVolumeDelta( +1)
-        }
-        viewBinding.btnDecrement.setOnClickListener {
-            viewModel.setVolumeDelta( -1)
-        }
-        viewBinding.btnPresetPlus.setOnClickListener { _->
-            viewModel.volumeDb.value?.let{viewModel.addPreset(it ) }
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
@@ -118,34 +51,123 @@ class MainActivity : AppCompatActivity() {
         viewModel.save()
     }
 
-    private fun updateServerDelayed() {
-        viewBinding.root.postDelayed(
-            {
-                viewModel.updateServer(
-                    viewBinding.etServerAddr.text.toString(),
-                    viewBinding.etServerPort.text.toString()
-                )
-            },
-            333L
-        )
+    private fun MainActivityViewModel.bindViewModelEvents() {
+        val activity = this@MainActivity
+        showConnectionSettings.observe(activity) {
+            if (it != null) {
+                views.swConnectionSettings.isChecked = it
+                views.tlConnectionSettings.vg(it)
+            }
+        }
+        serverAddr.observe(activity) {
+            views.etServerAddr.setTextIfChanged(it)
+        }
+        serverPort.observe(activity) {
+            views.etServerPort.setTextIfChanged(it)
+        }
+        password.observe(activity) {
+            views.etPassword.setTextIfChanged(it)
+        }
+
+        volumeBarPos.observe(activity) {
+            if (it != null && it != views.sbVolume.progress) {
+                views.sbVolume.progress = it
+            }
+        }
+        volumeDb.observe(activity) {
+            val text = it?.let { "${it}dB" } ?: ""
+            if (text != views.tvVolume.text.toString()) {
+                views.tvVolume.text = text
+            }
+        }
+        presets.observe(activity) {
+            updatePresets(it)
+        }
+        error.observe(activity) {
+            views.etError.setText(it ?: "")
+        }
+        deviceName.observe(activity) {
+            views.tvDeviceName.text = it ?: ""
+        }
+    }
+
+    private fun ActivityMainBinding.bindUiEvents() {
+        swConnectionSettings.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.showConnectionSettings.value = isChecked
+        }
+        etServerAddr.addTextChangedListener {
+            setServerConfig()
+        }
+        etServerPort.addTextChangedListener {
+            setServerConfig()
+        }
+        etPassword.addTextChangedListener {
+            setServerConfig()
+        }
+        btnIncrement.setOnClickListener {
+            viewModel.setVolumeDelta(+1)
+        }
+        btnDecrement.setOnClickListener {
+            viewModel.setVolumeDelta(-1)
+        }
+        btnPresetPlus.setOnClickListener {
+            viewModel.volumeDb.value?.let { db -> viewModel.addPreset(db) }
+        }
+        btnRefresh.setOnClickListener {
+            viewModel.postGetCurrentVolume()
+        }
+        sbVolume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            }
+
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                val volumeDb = seekBarPositionToVolumeDb(seekBar.progress)
+                if (volumeDb != viewModel.volumeDb.value) {
+                    viewModel.setVolume(volumeDb)
+                }
+            }
+        })
+    }
+
+    private fun EditText.setTextIfChanged(text: String?) {
+        text?.takeIf { it != this.text.toString() }
+            ?.let { this.setText(text) }
+    }
+
+    private fun setServerConfig() {
+        // bindUiEventsの呼び出しが全部終わってから実行したい
+        views.root.postDelayed(333L){
+            viewModel.setServerConfig(
+                views.etServerAddr.text.toString(),
+                views.etServerPort.text.toString(),
+                views.etPassword.text.toString(),
+            )
+        }
     }
 
     private fun updatePresets(srcList: List<Float>?) {
-        val flPresets = viewBinding.flPresets
-        var i = flPresets.childCount
-        while (--i >= 0) {
-            val child = flPresets.getChildAt(i)
-            if (child == null || child.id == R.id.btnPresetPlus) continue
-            flPresets.removeViewAt(i)
-        }
+        val flPresets = views.flPresets
+        (0 until flPresets.childCount)
+            .filter {
+                val child = flPresets.getChildAt(it)
+                child != null && child.id != R.id.btnPresetPlus
+            }
+            .reversed()
+            .forEach { flPresets.removeViewAt(it) }
+
         srcList?.sorted()?.forEach { value ->
-            val view =layoutInflater.inflate(R.layout.preset_button, flPresets,false)
+            val view = layoutInflater.inflate(R.layout.preset_button, flPresets, false)
             flPresets.addView(view)
-            if( view is Button){
+            if (view is Button) {
                 view.run {
                     text = value.toString()
-                    setOnClickListener { viewModel.setVolume(value) }
-                    setOnLongClickListener{
+                    setOnClickListener {
+                        viewModel.setVolume(value)
+                    }
+                    setOnLongClickListener {
                         viewModel.removePreset(value)
                         true
                     }
@@ -153,5 +175,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 }

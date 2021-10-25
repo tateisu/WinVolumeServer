@@ -24,7 +24,7 @@ namespace WinVolumeServer {
         }
 
         public static Task setStringResponse(this IHttpContext context, HttpStatusCode code, String message) {
-            context.Response.StatusCode = (int)HttpStatusCode.OK;
+            context.Response.StatusCode = (int)code;
             return context.SendStringAsync(message, "text/plain", Encoding.UTF8);
         }
 

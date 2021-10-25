@@ -1,6 +1,8 @@
 package jp.juggler.volumeclient
 
 import android.os.SystemClock
+import jp.juggler.volumeclient.Utils.digestSha256
+import jp.juggler.volumeclient.Utils.encodeBase64Url
 import jp.juggler.volumeclient.Utils.enqueueAndAwait
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -25,60 +27,62 @@ class SequentialUpdater(
     private val client = OkHttpClient()
     private val channel = Channel<Long>(capacity = 3)
     private val addr = AtomicReference<String>(null)
-    private var port = AtomicInteger(0);
+    private var port = AtomicInteger(0)
+    private var password = AtomicReference<String>(null)
     private val volumeDb = AtomicReference<Float>(null)
     private val willGet = AtomicBoolean(false)
     private val willSet = AtomicBoolean(false)
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun getCurrentVolume() {
+    suspend fun update(newVolume: Float? = null) {
         val addr = this.addr.get()
         val port = this.port.get()
         if (addr == null || port <= 0) {
             error("missing addr or port.")
         }
-        val url = "http://${addr}:${port}/volume"
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val request = if (newVolume != null) {
+            val url = "http://${addr}:${port}/volume?v=${newVolume}"
+            Request.Builder()
+                .url(url)
+                .also { embedPassword(it) }
+                .method("POST", "".toRequestBody("application/x-www-form-urlencoded".toMediaType()))
+                .build()
+        } else {
+            val url = "http://${addr}:${port}/volume"
+            Request.Builder()
+                .url(url)
+                .also { embedPassword(it) }
+                .build()
+        }
+
         val response = client.newCall(request).enqueueAndAwait()
         val bodyString = response.body?.string()
+        val errorText =
+            "$bodyString\n${response.code} ${response.message}\n${request.method} ${request.url}"
         if (!response.isSuccessful || bodyString == null) {
-            error("$bodyString / ${response.code} ${response.message} $bodyString / ${request.method} $url")
+            error(errorText)
         }
-        val root = JSONObject(bodyString)
+        val root = try {
+            JSONObject(bodyString)
+        } catch (ex: Throwable) {
+            error("json parse error.\n$errorText")
+        }
         val deviceName = root.optString("device", "")
         val volumeDb = root.optDouble("volume", Double.NaN).toFloat()
         if (!volumeDb.isFinite()) error("can't get volume value. $bodyString")
         withContext(Dispatchers.Main) {
+            onError("")
             handleGetResult(deviceName, volumeDb)
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun setCurrentVolume() {
-        val addr = this.addr.get()
-        val port = this.port.get()
-        val volume = this.volumeDb.get()
-        if (addr == null || port <= 0 || volume == null) {
-            error("missing addr or port.")
-        }
-        val url = "http://${addr}:${port}/volume?v=${volume}"
-        val request = Request.Builder()
-            .url(url)
-            .method("POST", "".toRequestBody("application/x-www-form-urlencoded".toMediaType()))
-            .build()
-        val response = client.newCall(request).enqueueAndAwait()
-        val bodyString = response.body?.string()
-        if (!response.isSuccessful || bodyString == null) {
-            error("$bodyString / ${response.code} ${response.message} $bodyString / ${request.method} $url")
-        }
-        val root = JSONObject(bodyString)
-        val deviceName = root.optString("device", "")
-        val volumeDb = root.optDouble("volume", Double.NaN).toFloat()
-        if (!volumeDb.isFinite()) error("can't get volume value. $bodyString")
-        withContext(Dispatchers.Main) {
-            handleGetResult(deviceName, volumeDb)
+    private fun embedPassword(rb: Request.Builder) {
+        val password = this.password.get()
+        if (password != null && password.isNotEmpty()) {
+            val timeLong = System.currentTimeMillis()
+            val digest = "${timeLong}:${password}".digestSha256().encodeBase64Url()
+            rb.addHeader("X-Password-Time", timeLong.toString())
+            rb.addHeader("X-Password-Digest", digest)
         }
     }
 
@@ -92,9 +96,10 @@ class SequentialUpdater(
         }
     }
 
-    suspend fun postGet(addr: String?, port: Int) {
+    suspend fun postGet(addr: String?, port: Int, password: String?) {
         this.addr.set(addr)
         this.port.set(port)
+        this.password.set(password)
         willGet.set(true)
         send()
     }
@@ -116,17 +121,13 @@ class SequentialUpdater(
                     val t = channel.receive()
                     if (t < 0L) {
                         channel.close()
-                        break;
+                        break
                     }
-
-                    if (willGet.compareAndSet(true, false)) {
-                        getCurrentVolume()
-                    }
-
                     if (willSet.compareAndSet(true, false)) {
-                        setCurrentVolume()
+                        update(volumeDb.get())
+                    } else {
+                        update()
                     }
-
                 } catch (ex: Throwable) {
                     log.w(ex)
                     if (ex is CancellationException || ex is ClosedReceiveChannelException) break

@@ -1,5 +1,6 @@
 package jp.juggler.volumeclient
 
+import android.util.Base64
 import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -11,6 +12,7 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
 import java.io.IOException
+import java.security.MessageDigest
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.resume
@@ -39,7 +41,6 @@ object Utils {
     ) =
         ViewModelProvider(owner, viewModelFactory(T::class.java, creator)).get(T::class.java)
 
-
     inline fun <reified T : View> T?.vg(isVisible: Boolean): T? =
         this?.also { visibility = if (isVisible) View.VISIBLE else View.GONE }?.takeIf { isVisible }
 
@@ -59,9 +60,21 @@ object Utils {
     fun Int.clip(min: Int, max: Int): Int {
         return max(min, min(max, this))
     }
+
     fun Float.clip(min: Float, max: Float): Float {
         return max(min, min(max, this))
     }
+
+    fun String.digestSha256(): ByteArray =
+        MessageDigest.getInstance("SHA-256")
+            .also { it.update(this.toByteArray(Charsets.UTF_8)) }
+            .digest()
+
+    fun ByteArray.encodeBase64Url(): String =
+        Base64.encodeToString(
+            this,
+            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+        )
 }
 
 object EmptyScope : CoroutineScope {

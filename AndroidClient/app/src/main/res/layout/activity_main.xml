@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:clipToPadding="false"
     android:fillViewport="true"
     android:orientation="vertical"
@@ -53,12 +54,39 @@
                     android:importantForAutofill="no"
                     android:inputType="number" />
             </TableRow>
+            <TableRow>
+
+                <TextView
+                    android:labelFor="@+id/etPassword"
+                    android:text="@string/password" />
+
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:importantForAutofill="no"
+                    android:inputType="textPassword" />
+            </TableRow>
         </TableLayout>
 
-        <TextView
-            android:id="@+id/tvDeviceName"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tvDeviceName"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+            <ImageButton
+                android:id="@+id/btnRefresh"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_refresh"
+                app:tint="?attr/colorImageButtonFg"
+                />
+
+        </LinearLayout>
+
 
         <SeekBar
             android:id="@+id/sbVolume"
@@ -85,6 +113,7 @@
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
                 android:contentDescription="@string/decrement"
+                app:tint="?attr/colorImageButtonFg"
                 android:src="@drawable/ic_arrow_left" />
 
             <ImageButton
@@ -93,6 +122,7 @@
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
                 android:contentDescription="@string/increment"
+                app:tint="?attr/colorImageButtonFg"
                 android:src="@drawable/ic_arrow_right" />
         </LinearLayout>
 

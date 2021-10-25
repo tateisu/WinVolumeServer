@@ -7,4 +7,5 @@
     <string name="increment">increment</string>
     <string name="presets_title">presets (long tap to delete)</string>
     <string name="plus_punk">+</string>
+    <string name="password">Password</string>
 </resources>
