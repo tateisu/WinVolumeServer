@@ -10,6 +10,6 @@
 - HTTPサーバとして動作する
 
 ## WinVolumeclient app (for Android)
-![image](https://user-images.githubusercontent.com/333944/138663842-6c8f5b12-7b27-45ac-bcc6-2e640dbd3a45.png)
+![image](https://user-images.githubusercontent.com/333944/138664181-9885df66-c4b2-4e23-a4f7-3d4948b612af.png)
 
 WinVolumeServerにアクセスしてリモートで音量を制御するアプリ。
