@@ -121,6 +121,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:background="@null"
+            android:importantForAutofill="no"
             android:inputType="none" />
     </LinearLayout>
 </ScrollView>

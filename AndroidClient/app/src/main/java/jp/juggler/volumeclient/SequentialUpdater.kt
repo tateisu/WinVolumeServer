@@ -1,11 +1,10 @@
 package jp.juggler.volumeclient
 
+import android.os.SystemClock
 import jp.juggler.volumeclient.Utils.enqueueAndAwait
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,13 +18,17 @@ class SequentialUpdater(
     val onError: (String) -> Unit,
     val handleGetResult: (String, Float) -> Unit
 ) {
+    companion object {
+        private val log = LogTag("SequentialUpdater")
+    }
+
     private val client = OkHttpClient()
-    val channel = Channel<Long>(capacity = 3)
-    val addr = AtomicReference<String>(null)
-    var port = AtomicInteger(0);
-    val volumeDb = AtomicReference<Float>(null)
-    val willGet = AtomicBoolean(false)
-    val willSet = AtomicBoolean(false)
+    private val channel = Channel<Long>(capacity = 3)
+    private val addr = AtomicReference<String>(null)
+    private var port = AtomicInteger(0);
+    private val volumeDb = AtomicReference<Float>(null)
+    private val willGet = AtomicBoolean(false)
+    private val willSet = AtomicBoolean(false)
 
     @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun getCurrentVolume() {
@@ -79,6 +82,33 @@ class SequentialUpdater(
         }
     }
 
+    private suspend fun send(value: Long = SystemClock.elapsedRealtime()) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                channel.send(value)
+            } catch (ex: Throwable) {
+                log.w(ex)
+            }
+        }
+    }
+
+    suspend fun postGet(addr: String?, port: Int) {
+        this.addr.set(addr)
+        this.port.set(port)
+        willGet.set(true)
+        send()
+    }
+
+    suspend fun postVolume(volumeDb: Float) {
+        this.volumeDb.set(volumeDb)
+        willSet.set(true)
+        send()
+    }
+
+    suspend fun sendExit() {
+        send(-1L)
+    }
+
     init {
         EmptyScope.launch(Dispatchers.IO) {
             while (true) {
@@ -88,14 +118,18 @@ class SequentialUpdater(
                         channel.close()
                         break;
                     }
+
                     if (willGet.compareAndSet(true, false)) {
                         getCurrentVolume()
                     }
+
                     if (willSet.compareAndSet(true, false)) {
                         setCurrentVolume()
                     }
+
                 } catch (ex: Throwable) {
-                    if (ex is CancellationException) break
+                    log.w(ex)
+                    if (ex is CancellationException || ex is ClosedReceiveChannelException) break
                     val text = if (ex is IllegalStateException) {
                         ex.message ?: "(no message)"
                     } else {

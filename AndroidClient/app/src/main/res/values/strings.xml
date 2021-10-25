@@ -5,6 +5,6 @@
     <string name="server_port">Server Port</string>
     <string name="decrement">decrement</string>
     <string name="increment">increment</string>
-    <string name="presets_title">presets (long press to delete)</string>
+    <string name="presets_title">presets (long tap to delete)</string>
     <string name="plus_punk">+</string>
 </resources>

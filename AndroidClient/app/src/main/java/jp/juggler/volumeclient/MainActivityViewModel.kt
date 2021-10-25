@@ -3,15 +3,16 @@ package jp.juggler.volumeclient
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import jp.juggler.volumeclient.Utils.clip
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     companion object {
+        // val log = LogTag("MainActivityViewModel")
         const val prefName = "pref"
         const val keyShowConnectionSettings = "showConnectionSettings"
         const val keyServerAddr = "serverAddr"
@@ -22,16 +23,18 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
         const val seekBarMax = minDb * 2
 
         fun seekBarPositionToVolumeDb(pos: Int) =
-            (pos - seekBarMax).toFloat().div(2f).clip((-minDb).toFloat(),0f)
+            (pos - seekBarMax).toFloat().div(2f).clip((-minDb).toFloat(), 0f)
 
-        fun volumeDbToSeekBarPos(db:Float) =
+        fun volumeDbToSeekBarPos(db: Float) =
             ((db + minDb.toFloat()) * 2f + 0.5f).toInt().clip(0, seekBarMax)
     }
 
     @SuppressLint("StaticFieldLeak")
     val context: Context = contextSrc.applicationContext
 
-    private val pref: SharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
+    private val pref: SharedPreferences =
+        context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
+
     val showConnectionSettings = MutableLiveData<Boolean>()
     val serverAddr = MutableLiveData<String>()
     val serverPort = MutableLiveData<String>()
@@ -40,6 +43,7 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     val error = MutableLiveData<String>()
     val presets = MutableLiveData<List<Float>>()
     val deviceName = MutableLiveData<String>()
+
     private var isCleared = false
 
     private val updater = SequentialUpdater(
@@ -60,7 +64,9 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     override fun onCleared() {
         isCleared = true
         super.onCleared()
-        updater.channel.sendBlocking(-1L)
+        EmptyScope.launch {
+            updater.sendExit()
+        }
     }
 
     fun loadOrRestore() {
@@ -76,10 +82,10 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
 
     fun save() {
         pref.edit()
-            .putBoolean(keyShowConnectionSettings,showConnectionSettings.value?: true)
-            .putString(keyServerAddr,serverAddr.value)
-            .putString(keyServerPort,serverPort.value)
-            .putString(keyPresets,presets.value?.joinToString("/"))
+            .putBoolean(keyShowConnectionSettings, showConnectionSettings.value ?: true)
+            .putString(keyServerAddr, serverAddr.value)
+            .putString(keyServerPort, serverPort.value)
+            .putString(keyPresets, presets.value?.joinToString("/"))
             .apply()
     }
 
@@ -90,10 +96,9 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     }
 
     fun postGetCurrentVolume() {
-        updater.addr.set(serverAddr.value)
-        updater.port.set(serverPort.value?.toIntOrNull() ?: 0)
-        updater.willGet.set(true)
-        updater.channel.sendBlocking(SystemClock.elapsedRealtime())
+        viewModelScope.launch {
+            updater.postGet(serverAddr.value, serverPort.value?.toIntOrNull() ?: 0)
+        }
     }
 
     private fun showVolume(newValue: Float) {
@@ -103,19 +108,19 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
 
     fun setVolume(volumeDb: Float) {
         showVolume(volumeDb)
-        updater.volumeDb.set(volumeDb)
-        updater.willSet.set(true)
-        updater.channel.sendBlocking(SystemClock.elapsedRealtime())
+        viewModelScope.launch {
+            updater.postVolume(volumeDb)
+        }
     }
 
-    fun setVolumeDelta(delta:Int) {
-        val newPos = ((volumeBarPos.value?:0)+delta).clip(0, seekBarMax)
+    fun setVolumeDelta(delta: Int) {
+        val newPos = ((volumeBarPos.value ?: 0) + delta).clip(0, seekBarMax)
         setVolume(seekBarPositionToVolumeDb(newPos))
     }
 
-    fun addPreset(newValue: Float ) {
-        val dstList = ArrayList( presets.value ?: emptyList())
-        if( dstList.any{ abs(it-newValue)<0.1f}) return
+    fun addPreset(newValue: Float) {
+        val dstList = ArrayList(presets.value ?: emptyList())
+        if (dstList.any { abs(it - newValue) < 0.1f }) return
         dstList.add(newValue)
         dstList.sort()
         presets.value = dstList
@@ -123,8 +128,8 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     }
 
     fun removePreset(value: Float) {
-        val dstList = ArrayList( presets.value ?: emptyList())
-            .filter {  abs(it-value)>0.1f }
+        val dstList = ArrayList(presets.value ?: emptyList())
+            .filter { abs(it - value) > 0.1f }
         presets.value = dstList
         save()
     }
