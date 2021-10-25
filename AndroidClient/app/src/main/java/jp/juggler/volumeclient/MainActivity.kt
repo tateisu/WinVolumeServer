@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(views.root)
         views.sbVolume.max = MainActivityViewModel.seekBarMax
-        views.etError.inputType = InputType.TYPE_NULL
 
         viewModel.loadOrRestore()
         viewModel.bindViewModelEvents()

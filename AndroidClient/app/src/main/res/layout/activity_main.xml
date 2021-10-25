@@ -156,7 +156,7 @@
             android:layout_marginTop="16dp"
             android:background="@null"
             android:importantForAutofill="no"
-            android:inputType="none"
+            android:inputType="textMultiLine"
             android:textColor="#ff0000" />
     </LinearLayout>
 </ScrollView>
