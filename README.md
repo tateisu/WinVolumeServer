@@ -18,3 +18,29 @@ WinVolumeServerにアクセスしてリモートで音量を制御するアプ�
 
 ![image](https://user-images.githubusercontent.com/333944/138664181-9885df66-c4b2-4e23-a4f7-3d4948b612af.png)
 
+----
+## API
+
+### 認証
+パスワードがカラではないなら、以下のヘッダをセットすること
+
+|ヘッダ|値｜
+|--|--|
+|X-Password-Time|リクエストを投げた際の時刻(unixtime,ミリ秒単位)|
+|X-Password-Digest| "{時刻}:{パスワード}"をUTF-8にしてSHA256ダイジェストにしてBase64(url safe)エンコードした文字列|
+
+### GET /volume
+
+レスポンス：以下のデータを持つjsonObjectを返す。
+
+|キー|型｜説明|
+|--|--|
+|device|string?|現在の出力デバイスの名前。空文字列やnullがありうる|
+|volume|float?|現在のボリューム。db単位、範囲は-96…0|
+
+### POST /volume?v=X
+ボリュームを設定する。
+- クエリパラメータvにボリュームをdb単位で指定する。
+- 出力デバイスによって指定可能な範囲が代わり、自動的にクリップされる。
+
+レスポンス：設定後の状態を 返す。形式は`GET /volume` と同じ。
