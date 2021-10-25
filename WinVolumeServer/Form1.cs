@@ -20,9 +20,9 @@ namespace WinVolumeServer {
             }
             tbServerPrefix.Text = Hub.pref.serverPrefix;
             tbServerError.Text = Hub.pref.serverError;
+            tbPassword.Text = Hub.pref.password;
             tbAudioDevice.Text = Volume.getDeviceName();
-            double? dv = Volume.getVolume();
-            tbVolume.Text = dv == null ? "" : dv.ToString();
+            tbVolume.Text = Volume.getVolume()?.ToString() ?? "";
         }
 
         private void btnServerRestart_Click(object sender, System.EventArgs e) {

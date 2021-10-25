@@ -2,6 +2,7 @@ package jp.juggler.volumeclient
 
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
 import android.widget.SeekBar
@@ -23,17 +24,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(views.root)
 
-        views.sbVolume.apply {
-            this.max = MainActivityViewModel.seekBarMax
-        }
+        setContentView(views.root)
+        views.sbVolume.max = MainActivityViewModel.seekBarMax
+        views.etError.inputType = InputType.TYPE_NULL
 
         viewModel.loadOrRestore()
-
         viewModel.bindViewModelEvents()
         views.bindUiEvents()
-
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
@@ -139,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setServerConfig() {
         // bindUiEventsの呼び出しが全部終わってから実行したい
-        views.root.postDelayed(333L){
+        views.root.postDelayed(333L) {
             viewModel.setServerConfig(
                 views.etServerAddr.text.toString(),
                 views.etServerPort.text.toString(),
