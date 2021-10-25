@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <!-- デファルトの設定 -->
+    <base-config cleartextTrafficPermitted="true"
+        tools:ignore="InsecureBaseConfiguration" />
+<!--    &lt;!&ndash; ドメイン毎の設定 &ndash;&gt;-->
+<!--    <domain-config cleartextTrafficPermitted="true">-->
+<!--        <domain includeSubdomains="true">secure.example.com</domain>-->
+<!--    </domain-config>-->
+</network-security-config>

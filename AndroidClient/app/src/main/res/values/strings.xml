@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">VolumeClient</string>
+    <string name="show_connection_settings">show connection settings</string>
+    <string name="server_addr">Server Addr.</string>
+    <string name="server_port">Server Port</string>
+    <string name="decrement">decrement</string>
+    <string name="increment">increment</string>
+    <string name="presets_title">presets (long press to delete)</string>
+    <string name="plus_punk">+</string>
+</resources>
