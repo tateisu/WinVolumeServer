@@ -24,10 +24,10 @@ WinVolumeServerにアクセスしてリモートで音量を制御するアプ�
 ### 認証
 パスワードがカラではないなら、以下のヘッダをセットすること
 
-|ヘッダ|値｜
+|ヘッダ|値|
 |--|--|
 |X-Password-Time|リクエストを投げた際の時刻(unixtime,ミリ秒単位)|
-|X-Password-Digest| "{時刻}:{パスワード}"をUTF-8にしてSHA256ダイジェストにしてBase64(url safe)エンコードした文字列|
+|X-Password-Digest|"{時刻}:{パスワード}"をUTF-8にしてSHA256ダイジェストにしてBase64(url safe)エンコードした文字列|
 
 ### GET /volume
 
