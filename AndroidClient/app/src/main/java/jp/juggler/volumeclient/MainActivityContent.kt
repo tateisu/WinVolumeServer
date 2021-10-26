@@ -71,9 +71,6 @@ fun MainActivityContent(
                 )
             }
         ) {
-            // actual composable state
-            var scrollOffset by remember { mutableStateOf(0f) }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
