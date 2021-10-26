@@ -7,36 +7,38 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = buttonBgDark,
-    onSecondary = Color.White,
-)
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
+    background = Color.White,
+    onBackground = Color.Black,
+
+    primary = colorPrimaryLight,
+    primaryVariant = colorPrimaryVariantLight,
+    onPrimary = Color.White,
+
     secondary = buttonBgLight,
     onSecondary = Color.Black,
+)
 
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
+private val DarkColorPalette = darkColors(
+    background = Color.Black,
+    onBackground = Color.White,
+
+    primary = colorPrimaryDark,
+    primaryVariant = colorPrimaryVariantDark,
     onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
+
+    secondary = buttonBgDark,
+    onSecondary = Color.White,
 )
 
 
 @Composable
 fun TestJetpackComposeTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean? = null,
     content: @Composable() () -> Unit
 ) {
-    val colors = if (darkTheme) {
+    val colors = if (darkTheme?: isSystemInDarkTheme()) {
         DarkColorPalette
     } else {
         LightColorPalette

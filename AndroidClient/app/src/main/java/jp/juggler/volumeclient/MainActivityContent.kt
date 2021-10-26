@@ -1,6 +1,11 @@
 package jp.juggler.volumeclient
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.os.Build
+import android.view.View
+import android.view.Window
+import android.view.WindowInsetsController
+import android.view.WindowManager
+import androidx.annotation.ColorInt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
@@ -17,7 +22,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,13 +36,13 @@ import com.google.accompanist.flowlayout.FlowRow
 import jp.juggler.volumeclient.MainActivityViewModelImpl.Companion.seekBarPositionToVolumeDb
 import jp.juggler.volumeclient.ui.theme.TestJetpackComposeTheme
 
+@Suppress("unused")
 private val log = LogTag("MainActivityContent")
 
-@ExperimentalFoundationApi
 @Preview
 @Composable
 fun PreviewMainActivityContent() =
-    MainActivityContent(MainActivityViewModelStub)
+    MainActivityContent(null, MainActivityViewModelStub)
 
 fun <T> MutableLiveData<T>.setIfChanged(newValue: T) {
     if (newValue != this.value) {
@@ -41,10 +50,15 @@ fun <T> MutableLiveData<T>.setIfChanged(newValue: T) {
     }
 }
 
-@ExperimentalFoundationApi
 @Composable
-fun MainActivityContent(viewModel: MainActivityViewModel) {
-    TestJetpackComposeTheme {
+fun MainActivityContent(
+    window: Window?,
+    viewModel: MainActivityViewModel
+) {
+    val darkTheme by viewModel.darkTheme.observeAsState()
+    TestJetpackComposeTheme(darkTheme = darkTheme) {
+
+        window?.setSystemUiColor(MaterialTheme.colors.surface)
 
         Scaffold(
             topBar = {
@@ -75,14 +89,40 @@ fun MainActivityContent(viewModel: MainActivityViewModel) {
                 // android:scrollbarStyle="outsideOverlay"
             ) {
 
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TriStateCheckbox(
+                        state = when (darkTheme) {
+                            null -> ToggleableState.Indeterminate
+                            false -> ToggleableState.Off
+                            else -> ToggleableState.On
+                        },
+                        onClick = {
+                            viewModel.darkTheme.value = when (darkTheme) {
+                                null -> false
+                                false -> true
+                                true -> null
+                            }
+                        },
+                        modifier = Modifier.height(40.dp),
+                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
+                    )
+                    SpacerH(4.dp)
+                    Text(
+                        text = stringResource(id = R.string.dark_theme),
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colors.onBackground,
+                    )
+                }
+
                 // actual composable state
                 val showConnectionSettings by viewModel.showConnectionSettings.observeAsState()
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
+                    Checkbox(
                         checked = showConnectionSettings ?: true,
                         onCheckedChange = { viewModel.showConnectionSettings.value = it },
-                        modifier = Modifier.height(48.dp)
+                        modifier = Modifier.height(40.dp),
+                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
                     )
                     SpacerH(4.dp)
                     Text(
@@ -223,7 +263,7 @@ fun MainActivityContent(viewModel: MainActivityViewModel) {
                         fontSize = 20.sp,
                     )
 
-                    SpacerH(4.dp)
+                    SpacerH(8.dp)
 
                     IconButton(
                         onClick = { viewModel.setVolume((volumeDb ?: 0f) - 0.5f) },
@@ -262,7 +302,9 @@ fun MainActivityContent(viewModel: MainActivityViewModel) {
                     color = MaterialTheme.colors.onBackground,
                 )
 
-                FlowRow {
+                FlowRow(
+                    crossAxisSpacing = 4.dp
+                ) {
                     val presets by viewModel.presets.observeAsState()
 
                     @Composable
@@ -304,6 +346,93 @@ fun MainActivityContent(viewModel: MainActivityViewModel) {
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+private fun Window.setSystemUiColor(color: Color, forceDark: Boolean = false) {
+    // 古い端末ではナビゲーションバーのアイコン色を設定できないため
+    // メディアビューア画面ではステータスバーやナビゲーションバーの色を設定しない…
+    if (forceDark && Build.VERSION.SDK_INT < 26) return
+
+    if (Build.VERSION.SDK_INT < 30) {
+        @Suppress("DEPRECATION")
+        clearFlags(
+            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+        )
+    }
+
+    addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
+    var c = when {
+        forceDark -> Color.Black
+        else -> color
+    }
+    setStatusBarColorCompat(c)
+
+    c = when {
+        forceDark -> Color.Black
+        else -> color
+    }
+    setNavigationBarColorCompat(c)
+}
+
+private fun Window.setStatusBarColorCompat(color: Color) {
+    @ColorInt val c = color.toArgb()
+    val isLightBg = color.luminance() >= 0.5f
+
+    statusBarColor = android.graphics.Color.BLACK or c
+
+    if (Build.VERSION.SDK_INT >= 30) {
+        decorView.windowInsetsController?.run {
+            val bit = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            setSystemBarsAppearance(if (isLightBg) bit else 0, bit)
+        }
+    } else if (Build.VERSION.SDK_INT >= 23) {
+        @Suppress("DEPRECATION")
+        val bit = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        @Suppress("DEPRECATION")
+        decorView.systemUiVisibility =
+            if (isLightBg) {
+                //Dark Text to show up on your light status bar
+                decorView.systemUiVisibility or bit
+            } else {
+                //Light Text to show up on your dark status bar
+                decorView.systemUiVisibility and bit.inv()
+            }
+    }
+}
+
+private fun Window.setNavigationBarColorCompat(color: Color) {
+    @ColorInt val c = color.toArgb()
+    val isLightBg = color.luminance() >= 0.5f
+
+    if (c == 0) {
+        // no way to restore to system default, need restart app.
+        return
+    }
+
+    navigationBarColor = c or android.graphics.Color.BLACK
+
+    if (Build.VERSION.SDK_INT >= 30) {
+        decorView.windowInsetsController?.run {
+            val bit = WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            setSystemBarsAppearance(if (isLightBg) bit else 0, bit)
+        }
+    } else if (Build.VERSION.SDK_INT >= 26) {
+        @Suppress("DEPRECATION")
+        val bit = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        @Suppress("DEPRECATION")
+        decorView.systemUiVisibility = when {
+            isLightBg -> {
+                //Dark Text to show up on your light status bar
+                decorView.systemUiVisibility or bit
+            }
+            else -> {
+                //Light Text to show up on your dark status bar
+                decorView.systemUiVisibility and bit.inv()
             }
         }
     }

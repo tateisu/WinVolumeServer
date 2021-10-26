@@ -1,0 +1,14 @@
+<resources>
+    <string name="show_connection_settings">接続設定の表示</string>
+    <string name="server_addr">サーバのアドレス</string>
+    <string name="server_port">サーバのポート番号</string>
+    <string name="decrement">減少</string>
+    <string name="increment">増加</string>
+    <string name="presets_title">プリセット (長押しで削除)</string>
+    <string name="plus_punk">+</string>
+    <string name="password">パスワード</string>
+    <string name="connected">接続した。</string>
+    <string name="connection_error">接続エラー。\n%1$s</string>
+    <string name="refresh">更新</string>
+    <string name="dark_theme">ダークテーマ</string>
+</resources>

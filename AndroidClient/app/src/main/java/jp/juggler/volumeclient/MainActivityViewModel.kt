@@ -1,6 +1,5 @@
 package jp.juggler.volumeclient
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +10,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 interface MainActivityViewModel {
+    // tri-value: boolean or null
+    val darkTheme: MutableLiveData<Boolean?>
     val showConnectionSettings: MutableLiveData<Boolean>
     val serverAddr: MutableLiveData<String>
     val serverPort: MutableLiveData<String>
@@ -23,13 +24,13 @@ interface MainActivityViewModel {
 
     fun postGetCurrentVolume()
     fun setVolume(v: Float, callApi: Boolean = true)
-
     fun addPreset(v: Float)
     fun removePreset(v: Float)
 }
 
-// IDEのプレビュー用
+// Jetpack Compose のIDEプレビュー用
 object MainActivityViewModelStub : MainActivityViewModel {
+    override val darkTheme = MutableLiveData<Boolean?>(null)
     override val showConnectionSettings = MutableLiveData(true)
     override val serverAddr = MutableLiveData("X.X.X.X")
     override val serverPort = MutableLiveData("2021")
@@ -48,10 +49,13 @@ object MainActivityViewModelStub : MainActivityViewModel {
 }
 
 // 実際の実装
-class MainActivityViewModelImpl(contextSrc: Context) : ViewModel(), MainActivityViewModel {
+class MainActivityViewModelImpl(
+    context: Context
+) : ViewModel(), MainActivityViewModel {
     companion object {
         val log = LogTag("MainActivityViewModel")
         const val prefName = "pref"
+        const val keyDarkTheme = "darkTheme"
         const val keyShowConnectionSettings = "showConnectionSettings"
         const val keyServerAddr = "serverAddr"
         const val keyServerPort = "serverPort"
@@ -72,12 +76,12 @@ class MainActivityViewModelImpl(contextSrc: Context) : ViewModel(), MainActivity
             db.roundDb().div(minDb) + 1f
     }
 
-    @SuppressLint("StaticFieldLeak")
-    val context: Context = contextSrc.applicationContext
+    private val pref: SharedPreferences = context.getSharedPreferences(
+        prefName,
+        Context.MODE_PRIVATE
+    )
 
-    private val pref: SharedPreferences =
-        context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
-
+    override val darkTheme = MutableLiveData<Boolean?>()
     override val showConnectionSettings = MutableLiveData<Boolean>()
     override val serverAddr = MutableLiveData<String>()
     override val serverPort = MutableLiveData<String>()
@@ -115,6 +119,11 @@ class MainActivityViewModelImpl(contextSrc: Context) : ViewModel(), MainActivity
 
     fun loadOrRestore() {
         showConnectionSettings.value = pref.getBoolean(keyShowConnectionSettings, true)
+        darkTheme.value = when (pref.getInt(keyDarkTheme, -1)) {
+            -1 -> null
+            0 -> false
+            else -> true
+        }
         serverAddr.value = pref.getString(keyServerAddr, "X.X.X.X")
         serverPort.value = pref.getString(keyServerPort, "2021")
         password.value = pref.getString(keyPassword, "")
@@ -128,20 +137,19 @@ class MainActivityViewModelImpl(contextSrc: Context) : ViewModel(), MainActivity
     fun save() {
         pref.edit()
             .putBoolean(keyShowConnectionSettings, showConnectionSettings.value ?: true)
+            .putInt(
+                keyDarkTheme, when (darkTheme.value) {
+                    null -> -1
+                    false -> 0
+                    true -> 1
+                }
+            )
             .putString(keyServerAddr, serverAddr.value)
             .putString(keyServerPort, serverPort.value)
             .putString(keyPassword, password.value)
             .putString(keyPresets, presets.value?.joinToString("/"))
             .apply()
     }
-
-//    fun setServerConfig(addr: String, port: String, password: String) {
-//        if (addr != this.serverAddr.value) this.serverAddr.value = addr
-//        if (port != this.serverPort.value) this.serverPort.value = port
-//        if (password != this.password.value) this.password.value = password
-//        postGetCurrentVolume()
-//    }
-//    override fun postServerConfig()  = postGetCurrentVolume()
 
     override fun postGetCurrentVolume() {
         viewModelScope.launch {
