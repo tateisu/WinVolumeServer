@@ -1,9 +1,7 @@
 package jp.juggler.volumeclient
 
 import android.os.SystemClock
-import jp.juggler.volumeclient.Utils.digestSha256
-import jp.juggler.volumeclient.Utils.encodeBase64Url
-import jp.juggler.volumeclient.Utils.enqueueAndAwait
+import jp.juggler.volumeclient.utils.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -16,6 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * サーバへのアクセスを順次行う。並列実行しない。
+ */
 class SequentialUpdater(
     val onError: (StringResAndArgs) -> Unit,
     val handleGetResult: (String, Float) -> Unit
@@ -35,7 +36,7 @@ class SequentialUpdater(
     private val willSet = AtomicBoolean(false)
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun update(newVolume: Float? = null) {
+    private suspend fun update(newVolume: Float? = null) {
         val addr = this.addr.get()
         val port = this.port.get()
         if (addr == null || port <= 0) {
@@ -120,14 +121,15 @@ class SequentialUpdater(
             while (true) {
                 try {
                     val t = channel.receive()
-                    if (t < 0L) {
-                        channel.close()
-                        break
-                    }
-                    if (willSet.compareAndSet(true, false)) {
-                        update(volumeDb.get())
-                    } else {
-                        update()
+                    when {
+                        t < 0L -> {
+                            channel.close()
+                            break
+                        }
+                        willSet.compareAndSet(true, false) ->
+                            update(volumeDb.get())
+                        else ->
+                            update()
                     }
                 } catch (ex: Throwable) {
                     log.w(ex)
@@ -138,7 +140,7 @@ class SequentialUpdater(
                         "${ex.javaClass.simpleName} ${ex.message}"
                     }
                     withContext(Dispatchers.Main) {
-                        onError(StringResAndArgs.create(R.string.connection_error,text))
+                        onError(StringResAndArgs.create(R.string.connection_error, text))
                     }
                 }
             }

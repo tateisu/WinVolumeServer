@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import jp.juggler.volumeclient.Utils.provideViewModel
+import jp.juggler.volumeclient.utils.provideViewModel
 
 class MainActivity : ComponentActivity() {
 

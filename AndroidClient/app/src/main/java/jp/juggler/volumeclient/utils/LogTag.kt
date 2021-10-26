@@ -1,4 +1,4 @@
-package jp.juggler.volumeclient
+package jp.juggler.volumeclient.utils
 
 import android.util.Log
 

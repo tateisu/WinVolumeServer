@@ -5,7 +5,10 @@ import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import jp.juggler.volumeclient.Utils.clip
+import jp.juggler.volumeclient.utils.EmptyScope
+import jp.juggler.volumeclient.utils.LogTag
+import jp.juggler.volumeclient.utils.StringResAndArgs
+import jp.juggler.volumeclient.utils.clip
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 

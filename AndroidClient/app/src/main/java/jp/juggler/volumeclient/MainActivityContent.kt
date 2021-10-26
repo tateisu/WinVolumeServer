@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +36,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.accompanist.flowlayout.FlowRow
 import jp.juggler.volumeclient.MainActivityViewModelImpl.Companion.seekBarPositionToVolumeDb
 import jp.juggler.volumeclient.ui.theme.TestJetpackComposeTheme
+import jp.juggler.volumeclient.utils.LogTag
 
 @Suppress("unused")
 private val log = LogTag("MainActivityContent")
@@ -192,7 +194,7 @@ fun MainActivityContent(
 
                 val textResAndArgs by viewModel.error.observeAsState()
                 Text(
-                    text = textResAndArgs?.let { stringResource(it.resId, *(it.args)) } ?: "",
+                    text = textResAndArgs?.toString(resources()) ?: "",
                     modifier = Modifier.fillMaxWidth(),
                     color = if (textResAndArgs?.resId == R.string.connected)
                         MaterialTheme.colors.onBackground
