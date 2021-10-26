@@ -40,7 +40,7 @@ WinVolumeServerにアクセスしてリモートで音量を制御するアプ�
 - PCのWinVolumeServerの設定画面を見ながら入力する
 - 正しければ「接続した。」が表示されて操作できる。
 
-![image](https://user-images.githubusercontent.com/333944/138664181-9885df66-c4b2-4e23-a4f7-3d4948b612af.png)
+![image](https://user-images.githubusercontent.com/333944/138828874-76e4aefb-ec14-4890-95b7-c3baef87b110.png)
 
 ----
 ## API
