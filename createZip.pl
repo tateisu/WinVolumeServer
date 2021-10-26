@@ -2,7 +2,17 @@
 use strict;
 use warnings;
 use File::Copy qw/copy move/;
+use File::pushd;
 
+# build WinVolumeServer
+system qq(./buildServer.bat) and die;
+
+# build AndroidClient
+{
+	my $dir =pushd("AndroidClient");
+	system qq(./gradlew.bat clean) and die;
+	system qq(./gradlew.bat assembleRelease) and die;
+}
 
 my @lt = localtime;
 $lt[5]+=1900;$lt[4]+=1;
@@ -12,7 +22,7 @@ my $title = "WinVolumeServer-$timeStr";
 mkdir $title;
 
 copy(
-	'AndroidClient/app/release/app-release.apk', 
+	'AndroidClient/app/build/outputs/apk/release/app-release.apk',
 	"$title/WinVolumeClient.apk"
 );
 
