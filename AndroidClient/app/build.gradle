@@ -46,6 +46,8 @@ android {
         jvmTarget = '1.8'
         useIR = true
         freeCompilerArgs += "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi"
+        freeCompilerArgs += "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
+
     }
     buildFeatures {
         compose true

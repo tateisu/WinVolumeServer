@@ -6,6 +6,8 @@ import android.view.Window
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.annotation.ColorInt
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
@@ -122,7 +124,7 @@ fun MainActivityContent(
                     )
                 }
                 // AnimatedVisibility を使いたいがまだexperimental
-                if (showConnectionSettings != false) {
+                AnimatedVisibility(visible = showConnectionSettings != false) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
