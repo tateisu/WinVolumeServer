@@ -22,7 +22,7 @@ class SequentialUpdater(
 ) {
     companion object {
         private val log = LogTag("SequentialUpdater")
-        private val connected = StringResAndArgs(R.string.connected)
+        val connected = StringResAndArgs(R.string.connected)
     }
 
     private val client = OkHttpClient()

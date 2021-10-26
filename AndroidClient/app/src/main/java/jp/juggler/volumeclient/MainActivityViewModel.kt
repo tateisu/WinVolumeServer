@@ -10,9 +10,47 @@ import jp.juggler.volumeclient.Utils.clip
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-class MainActivityViewModel(contextSrc: Context) : ViewModel() {
+interface MainActivityViewModel {
+    val showConnectionSettings: MutableLiveData<Boolean>
+    val serverAddr: MutableLiveData<String>
+    val serverPort: MutableLiveData<String>
+    val password: MutableLiveData<String>
+    val volumeBarPos: MutableLiveData<Float>
+    val volumeDb: MutableLiveData<Float>
+    val error: MutableLiveData<StringResAndArgs>
+    val presets: MutableLiveData<List<Float>>
+    val deviceName: MutableLiveData<String>
+
+    fun postGetCurrentVolume()
+    fun setVolume(v: Float, callApi: Boolean = true)
+
+    fun addPreset(v: Float)
+    fun removePreset(v: Float)
+}
+
+// IDEのプレビュー用
+object MainActivityViewModelStub : MainActivityViewModel {
+    override val showConnectionSettings = MutableLiveData(true)
+    override val serverAddr = MutableLiveData("X.X.X.X")
+    override val serverPort = MutableLiveData("2021")
+    override val password = MutableLiveData("123456")
+    override val volumeBarPos = MutableLiveData(0.5f)
+    override val volumeDb = MutableLiveData(-15f)
+    override val error = MutableLiveData(
+        StringResAndArgs(R.string.connection_error, arrayOf("aaa"))
+    )
+    override val presets = MutableLiveData(listOf(-30f, -15f, 0f))
+    override val deviceName = MutableLiveData("device name")
+    override fun postGetCurrentVolume() = Unit
+    override fun setVolume(v: Float, callApi: Boolean) = Unit
+    override fun addPreset(v: Float) = Unit
+    override fun removePreset(v: Float) = Unit
+}
+
+// 実際の実装
+class MainActivityViewModelImpl(contextSrc: Context) : ViewModel(), MainActivityViewModel {
     companion object {
-        // val log = LogTag("MainActivityViewModel")
+        val log = LogTag("MainActivityViewModel")
         const val prefName = "pref"
         const val keyShowConnectionSettings = "showConnectionSettings"
         const val keyServerAddr = "serverAddr"
@@ -20,14 +58,18 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
         const val keyPassword = "password"
         const val keyPresets = "presets"
 
-        private const val minDb = 30
-        const val seekBarMax = minDb * 2
+        const val minDb = 30f
 
-        fun seekBarPositionToVolumeDb(pos: Int) =
-            (pos - seekBarMax).toFloat().div(2f).clip((-minDb).toFloat(), 0f)
+        // 0.5dB単位に丸める
+        // 範囲内にクリップする
+        fun Float.roundDb() =
+            (this * 2f).toInt().toFloat().times(0.5f).clip(-minDb, 0f)
+
+        fun seekBarPositionToVolumeDb(pos: Float) =
+            (pos - 1f).times(minDb).roundDb()
 
         fun volumeDbToSeekBarPos(db: Float) =
-            ((db + minDb.toFloat()) * 2f + 0.5f).toInt().clip(0, seekBarMax)
+            db.roundDb().div(minDb) + 1f
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -36,15 +78,15 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
     private val pref: SharedPreferences =
         context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
 
-    val showConnectionSettings = MutableLiveData<Boolean>()
-    val serverAddr = MutableLiveData<String>()
-    val serverPort = MutableLiveData<String>()
-    val password = MutableLiveData<String>()
-    val volumeBarPos = MutableLiveData<Int>()
-    val volumeDb = MutableLiveData<Float>()
-    val error = MutableLiveData<StringResAndArgs>()
-    val presets = MutableLiveData<List<Float>>()
-    val deviceName = MutableLiveData<String>()
+    override val showConnectionSettings = MutableLiveData<Boolean>()
+    override val serverAddr = MutableLiveData<String>()
+    override val serverPort = MutableLiveData<String>()
+    override val password = MutableLiveData<String>()
+    override val volumeBarPos = MutableLiveData<Float>()
+    override val volumeDb = MutableLiveData<Float>()
+    override val error = MutableLiveData<StringResAndArgs>()
+    override val presets = MutableLiveData<List<Float>>()
+    override val deviceName = MutableLiveData<String>()
 
     private var isCleared = false
 
@@ -57,7 +99,7 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
         handleGetResult = { deviceName, volumeDb ->
             if (!this.isCleared) {
                 this.deviceName.value = deviceName
-                showVolume(volumeDb)
+                setVolume(volumeDb, callApi = false)
                 save()
             }
         }
@@ -93,14 +135,15 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
             .apply()
     }
 
-    fun setServerConfig(addr: String, port: String, password: String) {
-        if (addr != this.serverAddr.value) this.serverAddr.value = addr
-        if (port != this.serverPort.value) this.serverPort.value = port
-        if (password != this.password.value) this.password.value = password
-        postGetCurrentVolume()
-    }
+//    fun setServerConfig(addr: String, port: String, password: String) {
+//        if (addr != this.serverAddr.value) this.serverAddr.value = addr
+//        if (port != this.serverPort.value) this.serverPort.value = port
+//        if (password != this.password.value) this.password.value = password
+//        postGetCurrentVolume()
+//    }
+//    override fun postServerConfig()  = postGetCurrentVolume()
 
-    fun postGetCurrentVolume() {
+    override fun postGetCurrentVolume() {
         viewModelScope.launch {
             updater.postGet(
                 serverAddr.value,
@@ -110,35 +153,35 @@ class MainActivityViewModel(contextSrc: Context) : ViewModel() {
         }
     }
 
-    private fun showVolume(newValue: Float) {
-        volumeDb.value = newValue
-        volumeBarPos.value = volumeDbToSeekBarPos(newValue)
-    }
-
-    fun setVolume(volumeDb: Float) {
-        showVolume(volumeDb)
-        viewModelScope.launch {
-            updater.postVolume(volumeDb)
+    override fun setVolume(v: Float, callApi: Boolean) {
+        val newDb = v.roundDb()
+        if (newDb != volumeDb.value) {
+            volumeDb.value = newDb
+        }
+        val newPos = volumeDbToSeekBarPos(newDb)
+        if (newPos != volumeBarPos.value) {
+            log.i("volumeBarPos=$newPos")
+            volumeBarPos.value = newPos
+        }
+        if (callApi) {
+            viewModelScope.launch {
+                updater.postVolume(newDb)
+            }
         }
     }
 
-    fun setVolumeDelta(delta: Int) {
-        val newPos = ((volumeBarPos.value ?: 0) + delta).clip(0, seekBarMax)
-        setVolume(seekBarPositionToVolumeDb(newPos))
-    }
-
-    fun addPreset(newValue: Float) {
+    override fun addPreset(v: Float) {
         val dstList = ArrayList(presets.value ?: emptyList())
-        if (dstList.any { abs(it - newValue) < 0.1f }) return
-        dstList.add(newValue)
+        if (dstList.any { abs(it - v) < 0.1f }) return
+        dstList.add(v)
         dstList.sort()
         presets.value = dstList
         save()
     }
 
-    fun removePreset(value: Float) {
+    override fun removePreset(v: Float) {
         val dstList = ArrayList(presets.value ?: emptyList())
-            .filter { abs(it - value) > 0.1f }
+            .filter { abs(it - v) > 0.1f }
         presets.value = dstList
         save()
     }

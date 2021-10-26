@@ -5,9 +5,9 @@ import android.content.res.Resources
 import androidx.annotation.StringRes
 
 @Suppress("MemberVisibilityCanBePrivate")
-class StringResAndArgs(@StringRes val resId: Int, val args: Array<out Any?>) {
+class StringResAndArgs(@StringRes val resId: Int, val args: Array<out Any>) {
     companion object {
-        fun create(@StringRes resId: Int, vararg args: Any?) = StringResAndArgs(resId, args)
+        fun create(@StringRes resId: Int, vararg args: Any) = StringResAndArgs(resId, args)
     }
 
     constructor(@StringRes resId: Int) : this(resId, emptyArray())

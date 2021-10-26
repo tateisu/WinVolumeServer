@@ -10,4 +10,6 @@
     <string name="password">Password</string>
     <string name="connected">Connected.</string>
     <string name="connection_error">Connection error.\n%1$s</string>
+    <string name="refresh">Refresh</string>
+    <string name="connection_status">connection status</string>
 </resources>
