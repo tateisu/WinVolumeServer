@@ -168,14 +168,11 @@ fun MainActivityContent(
                                 PasswordVisualTransformation(),
                             trailingIcon = {
                                 IconButton(
-                                    onClick = {
-                                        log.i("passwordVisibility toggle")
-                                        showPassword = !showPassword
-                                    }
+                                    onClick = { showPassword = !showPassword }
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Visibility,
-                                        contentDescription = stringResource(id = R.string.show_hide_password),
+                                        contentDescription = stringResource(id = R.string.password_showing_toggle),
                                     )
                                 }
                             },
@@ -354,4 +351,3 @@ fun MainActivityContent(
         }
     }
 }
-

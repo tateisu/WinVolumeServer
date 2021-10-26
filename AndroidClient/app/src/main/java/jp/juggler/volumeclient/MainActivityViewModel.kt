@@ -115,9 +115,7 @@ class MainActivityViewModelImpl(
     override fun onCleared() {
         isCleared = true
         super.onCleared()
-        EmptyScope.launch {
-            updater.sendExit()
-        }
+        EmptyScope.launch { updater.send(-1L) }
     }
 
     fun loadOrRestore() {

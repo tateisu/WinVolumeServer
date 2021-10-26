@@ -27,7 +27,7 @@ class SequentialUpdater(
     }
 
     private val client = OkHttpClient()
-    private val channel = Channel<Long>(capacity = 3)
+    private val channel = Channel<Long>(capacity = Channel.CONFLATED)
     private val addr = AtomicReference<String>(null)
     private var port = AtomicInteger(0)
     private var password = AtomicReference<String>(null)
@@ -88,7 +88,7 @@ class SequentialUpdater(
         }
     }
 
-    private suspend fun send(value: Long = SystemClock.elapsedRealtime()) {
+    suspend fun send(value: Long = SystemClock.elapsedRealtime()) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 channel.send(value)
@@ -110,10 +110,6 @@ class SequentialUpdater(
         this.volumeDb.set(volumeDb)
         willSet.set(true)
         send()
-    }
-
-    suspend fun sendExit() {
-        send(-1L)
     }
 
     init {
@@ -143,6 +139,11 @@ class SequentialUpdater(
                         onError(StringResAndArgs.create(R.string.connection_error, text))
                     }
                 }
+            }
+            try {
+                channel.close()
+            } catch (ex: Throwable) {
+                log.w(ex)
             }
         }
     }

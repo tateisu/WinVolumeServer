@@ -12,5 +12,5 @@
     <string name="connection_error">Connection error.\n%1$s</string>
     <string name="refresh">Refresh</string>
     <string name="dark_theme">Dark theme</string>
-    <string name="show_hide_password">Show/Hide password</string>
+    <string name="password_showing_toggle">Toggle showing password</string>
 </resources>
