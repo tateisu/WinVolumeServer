@@ -12,6 +12,8 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.TextFieldDefaults.textFieldColors
 import androidx.compose.material.icons.Icons
@@ -76,19 +78,8 @@ fun MainActivityContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(all = 12.dp)
-                    .scrollable(
-                        orientation = Orientation.Vertical,
-                        // Scrollable state: describes how to consume
-                        // scrolling delta and update offset
-                        state = rememberScrollableState { delta ->
-                            delta.also { scrollOffset += delta }
-                            scrollOffset += delta
-                            delta
-                        }
-                    )
+                    .verticalScroll(rememberScrollState())
                     .background(MaterialTheme.colors.background),
-                // android:fillViewport="true"
-                // android:scrollbarStyle="outsideOverlay"
             ) {
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
