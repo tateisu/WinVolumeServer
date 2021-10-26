@@ -103,7 +103,6 @@ dependencies {
     // optional - Test helpers for LiveData
     testImplementation "androidx.arch.core:core-testing:$arch_version"
 
-
     implementation "com.google.accompanist:accompanist-flowlayout:0.20.0"
 
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
@@ -113,7 +112,7 @@ dependencies {
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
-
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
