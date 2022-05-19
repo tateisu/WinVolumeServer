@@ -16,7 +16,11 @@
         tools:ignore="AllowBackup,UnusedAttribute">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true">
+            <!--suppress AndroidElementNotAllowed -->
+            <layout android:minHeight="40dp" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,5 +28,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
