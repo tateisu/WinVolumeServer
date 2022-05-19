@@ -1,5 +1,5 @@
 <resources>
-    <string name="show_connection_settings">接続設定の表示</string>
+    <string name="show_settings">設定の表示</string>
     <string name="server_addr">サーバのアドレス</string>
     <string name="server_port">サーバのポート番号</string>
     <string name="decrement">減少</string>
@@ -12,4 +12,5 @@
     <string name="refresh">更新</string>
     <string name="dark_theme">ダークテーマ</string>
     <string name="password_showing_toggle">パスワード表示切り替え</string>
+    <string name="title_bar">タイトルバー</string>
 </resources>

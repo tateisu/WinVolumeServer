@@ -4,18 +4,43 @@ import android.view.Window
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Slider
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults.textFieldColors
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.TriStateCheckbox
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.ChevronLeft
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
@@ -28,7 +53,12 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import jp.juggler.volumeclient.MainActivityViewModelImpl.Companion.seekBarPositionToVolumeDb
 import jp.juggler.volumeclient.ui.theme.TestJetpackComposeTheme
-import jp.juggler.volumeclient.utils.*
+import jp.juggler.volumeclient.utils.LogTag
+import jp.juggler.volumeclient.utils.SpacerH
+import jp.juggler.volumeclient.utils.resources
+import jp.juggler.volumeclient.utils.setIfChanged
+import jp.juggler.volumeclient.utils.setSystemUiColor
+import jp.wasabeef.gap.Gap
 
 @Suppress("unused")
 private val log = LogTag("MainActivityContent")
@@ -50,20 +80,24 @@ fun MainActivityContent(
 
         window?.setSystemUiColor(MaterialTheme.colors.surface)
 
+        val showTitleBarState = viewModel.showTitleBar.observeAsState()
+
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text(text = stringResource(R.string.app_name)) },
-                    navigationIcon = {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
-                                contentDescription = stringResource(R.string.app_name),
-                                tint = Color.Unspecified
-                            )
-                        }
-                    },
-                )
+                if (showTitleBarState.value != false) {
+                    TopAppBar(
+                        title = { Text(text = stringResource(R.string.app_name)) },
+                        navigationIcon = {
+                            IconButton(onClick = {}) {
+                                Icon(
+                                    painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                                    contentDescription = stringResource(R.string.app_name),
+                                    tint = Color.Unspecified
+                                )
+                            }
+                        },
+                    )
+                }
             },
             modifier = Modifier
                 .background(MaterialTheme.colors.background)
@@ -72,34 +106,13 @@ fun MainActivityContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(all = 12.dp)
+                    .padding(
+                        top = 3.dp,
+                        bottom = 3.dp,
+                        start = 12.dp,
+                        end = 12.dp,
+                    )
             ) {
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TriStateCheckbox(
-                        state = when (darkTheme) {
-                            null -> ToggleableState.Indeterminate
-                            false -> ToggleableState.Off
-                            else -> ToggleableState.On
-                        },
-                        onClick = {
-                            viewModel.darkTheme.value = when (darkTheme) {
-                                null -> false
-                                false -> true
-                                true -> null
-                            }
-                        },
-                        modifier = Modifier.height(40.dp),
-                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
-                    )
-                    SpacerH(4.dp)
-                    Text(
-                        text = stringResource(id = R.string.dark_theme),
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colors.onBackground,
-                    )
-                }
-
                 // actual composable state
                 val showConnectionSettings by viewModel.showConnectionSettings.observeAsState()
 
@@ -110,14 +123,13 @@ fun MainActivityContent(
                         modifier = Modifier.height(40.dp),
                         colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
                     )
-                    SpacerH(4.dp)
+                    Gap(4.dp)
                     Text(
-                        text = stringResource(id = R.string.show_connection_settings),
+                        text = stringResource(id = R.string.show_settings),
                         modifier = Modifier.weight(1f),
                         color = MaterialTheme.colors.onBackground,
                     )
                 }
-                // AnimatedVisibility を使いたいがまだexperimental
                 AnimatedVisibility(visible = showConnectionSettings != false) {
                     Column(
                         modifier = Modifier
@@ -142,7 +154,7 @@ fun MainActivityContent(
                             )
                         )
 
-                        SpacerV(4.dp)
+                        Gap(4.dp)
 
                         TextField(
                             value = serverPort ?: "",
@@ -157,7 +169,7 @@ fun MainActivityContent(
                             )
                         )
 
-                        SpacerV(4.dp)
+                        Gap(4.dp)
 
                         var showPassword by remember { mutableStateOf(false) }
                         TextField(
@@ -186,10 +198,54 @@ fun MainActivityContent(
                                 textColor = MaterialTheme.colors.onBackground,
                             )
                         )
+
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TriStateCheckbox(
+                                state = when (darkTheme) {
+                                    null -> ToggleableState.Indeterminate
+                                    false -> ToggleableState.Off
+                                    else -> ToggleableState.On
+                                },
+                                onClick = {
+                                    viewModel.darkTheme.value = when (darkTheme) {
+                                        null -> false
+                                        false -> true
+                                        true -> null
+                                    }
+                                },
+                                modifier = Modifier.height(40.dp),
+                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
+                            )
+                            Gap(4.dp)
+                            Text(
+                                text = stringResource(id = R.string.dark_theme),
+                                modifier = Modifier.weight(1f),
+                                color = MaterialTheme.colors.onBackground,
+                            )
+                        }
+
+                        Gap(4.dp)
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = showTitleBarState.value ?: true,
+                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
+                                onCheckedChange = {
+                                    viewModel.setShowTitleBar(it)
+                                }
+                            )
+                            Gap(4.dp)
+                            Text(
+                                text = stringResource(id = R.string.title_bar),
+                                modifier = Modifier.weight(1f),
+                                color = MaterialTheme.colors.onBackground,
+                            )
+                        }
                     }
                 }
 
-                SpacerV(8.dp)
+                Gap(8.dp)
 
                 val textResAndArgs by viewModel.error.observeAsState()
                 Text(
@@ -201,7 +257,7 @@ fun MainActivityContent(
                         MaterialTheme.colors.error,
                 )
 
-                SpacerV(8.dp)
+                Gap(8.dp)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -215,13 +271,14 @@ fun MainActivityContent(
                         textAlign = TextAlign.End
                     )
 
-                    SpacerH(4.dp)
+                    Gap(4.dp)
 
                     IconButton(
                         onClick = { viewModel.postGetCurrentVolume() },
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(color = MaterialTheme.colors.secondary),
+                            .background(color = MaterialTheme.colors.secondary)
+                            // IconButtonのサイズ変更はthenを挟む必要がある
+                            .then(Modifier.size(40.dp)),
                     ) {
                         Icon(
                             Icons.Outlined.Refresh,
@@ -264,13 +321,14 @@ fun MainActivityContent(
                         fontSize = 20.sp,
                     )
 
-                    SpacerH(8.dp)
+                    Gap(8.dp)
 
                     IconButton(
                         onClick = { viewModel.setVolume((volumeDb ?: 0f) - 0.5f) },
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(color = MaterialTheme.colors.secondary),
+                            .background(color = MaterialTheme.colors.secondary)
+                            // IconButtonのサイズ変更はthenを挟む必要がある
+                            .then(Modifier.size(40.dp)),
                     ) {
                         Icon(
                             Icons.Outlined.ChevronLeft,
@@ -279,13 +337,14 @@ fun MainActivityContent(
                         )
                     }
 
-                    SpacerH(4.dp)
+                    Gap(10.dp)
 
                     IconButton(
                         onClick = { viewModel.setVolume((volumeDb ?: 0f) + 0.5f) },
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(color = MaterialTheme.colors.secondary),
+                            .background(color = MaterialTheme.colors.secondary)
+                            // IconButtonのサイズ変更はthenを挟む必要がある
+                            .then(Modifier.size(40.dp)),
                     ) {
                         Icon(
                             Icons.Outlined.ChevronRight,
@@ -295,7 +354,7 @@ fun MainActivityContent(
                     }
                 }
 
-                SpacerV(8.dp)
+                Gap(8.dp)
 
                 Text(
                     text = stringResource(id = R.string.presets_title),
@@ -303,48 +362,54 @@ fun MainActivityContent(
                     color = MaterialTheme.colors.onBackground,
                 )
 
-                FlowRow(
-                    crossAxisSpacing = 4.dp
-                ) {
-                    val presets by viewModel.presets.observeAsState()
-
-                    @Composable
-                    fun createButton(
-                        text: String,
-                        onClick: () -> Unit,
-                        onLongClick: (() -> Unit)? = null
+                Box(Modifier.fillMaxSize()) {
+                    FlowRow(
+                        crossAxisSpacing = 4.dp
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .background(MaterialTheme.colors.secondary)
-                                .height(40.dp)
-                                .widthIn(40.dp, 100.dp)
-                                .combinedClickable(
-                                    onClick = onClick,
-                                    onLongClick = onLongClick,
-                                ),
+                        val presets by viewModel.presets.observeAsState()
+
+                        @Composable
+                        fun createButton(
+                            text: String,
+                            onClick: () -> Unit,
+                            onLongClick: (() -> Unit)? = null
                         ) {
-                            Text(
-                                text = text,
-                                color = MaterialTheme.colors.onSecondary,
+                            val buttonHeight = 40.dp
+
+                            Box(
                                 modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(horizontal = 12.dp),
+                                    .background(MaterialTheme.colors.secondary)
+                                    .height(buttonHeight)
+                                    .combinedClickable(
+                                        onClick = onClick,
+                                        onLongClick = onLongClick,
+                                    ),
+                            ) {
+                                Text(
+                                    text = text,
+                                    color = MaterialTheme.colors.onSecondary,
+                                    fontSize = with(LocalDensity.current) {
+                                        (buttonHeight * 0.67f).toSp()
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .padding(horizontal = (buttonHeight * 0.3f)),
+                                )
+                            }
+                        }
+
+                        createButton(
+                            text = stringResource(id = R.string.plus_punk),
+                            onClick = { viewModel.addPreset(viewModel.volumeDb.value ?: 0f) }
+                        )
+                        presets?.forEach { it ->
+                            SpacerH(4.dp)
+                            createButton(
+                                text = it.toString(),
+                                onClick = { viewModel.setVolume(it, callApi = true) },
+                                onLongClick = { viewModel.removePreset(it) },
                             )
                         }
-                    }
-                    createButton(
-                        text = stringResource(id = R.string.plus_punk),
-                        onClick = { viewModel.addPreset(viewModel.volumeDb.value ?: 0f) }
-                    )
-
-                    presets?.forEach { it ->
-                        SpacerH(4.dp)
-                        createButton(
-                            text = it.toString(),
-                            onClick = { viewModel.setVolume(it, callApi = true) },
-                            onLongClick = { viewModel.removePreset(it) },
-                        )
                     }
                 }
             }

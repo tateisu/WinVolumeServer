@@ -24,11 +24,13 @@ interface MainActivityViewModel {
     val error: MutableLiveData<StringResAndArgs>
     val presets: MutableLiveData<List<Float>>
     val deviceName: MutableLiveData<String>
+    val showTitleBar: MutableLiveData<Boolean>
 
     fun postGetCurrentVolume()
     fun setVolume(v: Float, callApi: Boolean = true)
     fun addPreset(v: Float)
     fun removePreset(v: Float)
+    fun setShowTitleBar(v: Boolean)
 }
 
 // Jetpack Compose のIDEプレビュー用
@@ -45,10 +47,12 @@ object MainActivityViewModelStub : MainActivityViewModel {
     )
     override val presets = MutableLiveData(listOf(-30f, -15f, 0f))
     override val deviceName = MutableLiveData("device name")
+    override val showTitleBar = MutableLiveData(true)
     override fun postGetCurrentVolume() = Unit
     override fun setVolume(v: Float, callApi: Boolean) = Unit
     override fun addPreset(v: Float) = Unit
     override fun removePreset(v: Float) = Unit
+    override fun setShowTitleBar(v: Boolean) = Unit
 }
 
 // 実際の実装
@@ -64,6 +68,7 @@ class MainActivityViewModelImpl(
         const val keyServerPort = "serverPort"
         const val keyPassword = "password"
         const val keyPresets = "presets"
+        const val keyShowTitleBar = "showTitleBar"
 
         const val minDb = 30f
 
@@ -94,6 +99,7 @@ class MainActivityViewModelImpl(
     override val error = MutableLiveData<StringResAndArgs>()
     override val presets = MutableLiveData<List<Float>>()
     override val deviceName = MutableLiveData<String>()
+    override val showTitleBar = MutableLiveData(true)
 
     private var isCleared = false
 
@@ -133,6 +139,7 @@ class MainActivityViewModelImpl(
             ?.mapNotNull { it.toFloatOrNull() }
             ?.sorted()
             ?: emptyList()
+        showTitleBar.value = pref.getBoolean(keyShowTitleBar, true)
     }
 
     fun save() {
@@ -149,6 +156,7 @@ class MainActivityViewModelImpl(
             .putString(keyServerPort, serverPort.value)
             .putString(keyPassword, password.value)
             .putString(keyPresets, presets.value?.joinToString("/"))
+            .putBoolean(keyShowTitleBar, showTitleBar.value ?: true)
             .apply()
     }
 
@@ -192,6 +200,11 @@ class MainActivityViewModelImpl(
         val dstList = ArrayList(presets.value ?: emptyList())
             .filter { abs(it - v) > 0.1f }
         presets.value = dstList
+        save()
+    }
+
+    override fun setShowTitleBar(v: Boolean) {
+        showTitleBar.value = v
         save()
     }
 }
