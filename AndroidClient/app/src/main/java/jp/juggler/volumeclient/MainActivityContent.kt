@@ -7,6 +7,8 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
@@ -102,11 +105,17 @@ fun MainActivityContent(
             modifier = Modifier
                 .background(MaterialTheme.colors.background),
             content = { paddingValues ->
+                val ld = LocalLayoutDirection.current
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(paddingValues)
+                        .padding(
+                            start = 12.dp + paddingValues.calculateStartPadding(ld),
+                            end = 12.dp + paddingValues.calculateEndPadding(ld),
+                            top = 3.dp + paddingValues.calculateTopPadding(),
+                            bottom = 3.dp + paddingValues.calculateTopPadding(),
+                        )
                 ) {
                     // actual composable state
                     val showConnectionSettings by viewModel.showConnectionSettings.observeAsState()
@@ -409,8 +418,8 @@ fun MainActivityContent(
                     FlowRow(crossAxisSpacing = 4.dp) {
                         MediaControl.valuesCache.forEachIndexed() { i, m ->
                             if (i != 0) SpacerH(4.dp)
-                            val text =  stringResource(m.nameId)
-                            when (val icon =m.icon) {
+                            val text = stringResource(m.nameId)
+                            when (val icon = m.icon) {
                                 null -> {
                                     val mediaButtonHeight = 40.dp
                                     Box(
@@ -418,11 +427,11 @@ fun MainActivityContent(
                                             .background(MaterialTheme.colors.secondary)
                                             .height(mediaButtonHeight)
                                             .combinedClickable(
-                                                onClick =  { viewModel.mediaControl(m) },
+                                                onClick = { viewModel.mediaControl(m) },
                                             ),
                                     ) {
                                         Text(
-                                            text =  text,
+                                            text = text,
                                             color = MaterialTheme.colors.onSecondary,
                                             fontSize = with(LocalDensity.current) {
                                                 (mediaButtonHeight * 0.67f).toSp()

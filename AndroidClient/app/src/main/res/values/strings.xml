@@ -14,10 +14,10 @@
     <string name="dark_theme">Dark theme</string>
     <string name="password_showing_toggle">Toggle showing password</string>
     <string name="title_bar">Title bar</string>
-    <string name="media_control">media control</string>
-    <string name="media_play_pause">play/pause</string>
-    <string name="media_next_track">tr. next</string>
-    <string name="media_previous_track">tr. prev</string>
-    <string name="media_stop">stop</string>
-    <string name="kill_amazon_music">kill amazon music</string>
+    <string name="media_control">Media control</string>
+    <string name="media_play_pause">Play or Pause</string>
+    <string name="media_next_track">Track next</string>
+    <string name="media_previous_track">Track previous</string>
+    <string name="media_stop">Stop</string>
+    <string name="kill_amazon_music">Stop Amazon Music</string>
 </resources>
