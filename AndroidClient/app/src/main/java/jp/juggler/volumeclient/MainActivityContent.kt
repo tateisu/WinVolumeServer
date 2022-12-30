@@ -194,7 +194,6 @@ fun MainActivityContent(
                                 )
                             )
 
-
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 TriStateCheckbox(
                                     state = when (darkTheme) {
@@ -226,9 +225,7 @@ fun MainActivityContent(
                                 Checkbox(
                                     checked = showTitleBarState.value ?: true,
                                     colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
-                                    onCheckedChange = {
-                                        viewModel.setShowTitleBar(it)
-                                    }
+                                    onCheckedChange = { viewModel.setShowTitleBar(it) }
                                 )
                                 Gap(4.dp)
                                 Text(
@@ -241,6 +238,11 @@ fun MainActivityContent(
                     }
 
                     Gap(8.dp)
+
+                    fun incButtonStyle() =
+                        Modifier.background(color = MaterialTheme.colors.secondary)
+                            // IconButtonのサイズ変更はthenを挟む必要がある
+                            .then(Modifier.size(40.dp))
 
                     val textResAndArgs by viewModel.error.observeAsState()
                     Text(
@@ -270,10 +272,7 @@ fun MainActivityContent(
 
                         IconButton(
                             onClick = { viewModel.postGetCurrentVolume() },
-                            modifier = Modifier
-                                .background(color = MaterialTheme.colors.secondary)
-                                // IconButtonのサイズ変更はthenを挟む必要がある
-                                .then(Modifier.size(40.dp)),
+                            modifier = incButtonStyle(),
                         ) {
                             Icon(
                                 Icons.Outlined.Refresh,
@@ -321,10 +320,7 @@ fun MainActivityContent(
 
                         IconButton(
                             onClick = { viewModel.setVolume((volumeDb ?: 0f) - 0.5f) },
-                            modifier = Modifier
-                                .background(color = MaterialTheme.colors.secondary)
-                                // IconButtonのサイズ変更はthenを挟む必要がある
-                                .then(Modifier.size(40.dp)),
+                            modifier = incButtonStyle(),
                         ) {
                             Icon(
                                 Icons.Outlined.ChevronLeft,
@@ -337,10 +333,7 @@ fun MainActivityContent(
 
                         IconButton(
                             onClick = { viewModel.setVolume((volumeDb ?: 0f) + 0.5f) },
-                            modifier = Modifier
-                                .background(color = MaterialTheme.colors.secondary)
-                                // IconButtonのサイズ変更はthenを挟む必要がある
-                                .then(Modifier.size(40.dp)),
+                            modifier = incButtonStyle(),
                         ) {
                             Icon(
                                 Icons.Outlined.ChevronRight,
@@ -359,9 +352,7 @@ fun MainActivityContent(
                     )
 
                     Box(Modifier.fillMaxSize()) {
-                        FlowRow(
-                            crossAxisSpacing = 4.dp
-                        ) {
+                        FlowRow(crossAxisSpacing = 4.dp) {
                             val presets by viewModel.presets.observeAsState()
 
                             @Composable
@@ -370,12 +361,11 @@ fun MainActivityContent(
                                 onClick: () -> Unit,
                                 onLongClick: (() -> Unit)? = null
                             ) {
-                                val buttonHeight = 40.dp
-
+                                val volumeButtonHeight = 40.dp
                                 Box(
                                     modifier = Modifier
                                         .background(MaterialTheme.colors.secondary)
-                                        .height(buttonHeight)
+                                        .height(volumeButtonHeight)
                                         .combinedClickable(
                                             onClick = onClick,
                                             onLongClick = onLongClick,
@@ -385,11 +375,11 @@ fun MainActivityContent(
                                         text = text,
                                         color = MaterialTheme.colors.onSecondary,
                                         fontSize = with(LocalDensity.current) {
-                                            (buttonHeight * 0.67f).toSp()
+                                            (volumeButtonHeight * 0.67f).toSp()
                                         },
                                         modifier = Modifier
                                             .align(Alignment.Center)
-                                            .padding(horizontal = (buttonHeight * 0.3f)),
+                                            .padding(horizontal = (volumeButtonHeight * 0.3f)),
                                     )
                                 }
                             }

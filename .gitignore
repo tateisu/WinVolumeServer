@@ -481,5 +481,8 @@ lint/tmp/
 ##################################################################
 # private things
 
+/WinVolumeServerBin/
+
 androidSignKey.jks
 *.zip
+
