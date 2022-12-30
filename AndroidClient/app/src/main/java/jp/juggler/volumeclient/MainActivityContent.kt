@@ -100,319 +100,316 @@ fun MainActivityContent(
                 }
             },
             modifier = Modifier
-                .background(MaterialTheme.colors.background)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(
-                        top = 3.dp,
-                        bottom = 3.dp,
-                        start = 12.dp,
-                        end = 12.dp,
-                    )
-            ) {
-                // actual composable state
-                val showConnectionSettings by viewModel.showConnectionSettings.observeAsState()
+                .background(MaterialTheme.colors.background),
+            content = { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(paddingValues)
+                ) {
+                    // actual composable state
+                    val showConnectionSettings by viewModel.showConnectionSettings.observeAsState()
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = showConnectionSettings ?: true,
-                        onCheckedChange = { viewModel.showConnectionSettings.value = it },
-                        modifier = Modifier.height(40.dp),
-                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
-                    )
-                    Gap(4.dp)
-                    Text(
-                        text = stringResource(id = R.string.show_settings),
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colors.onBackground,
-                    )
-                }
-                AnimatedVisibility(visible = showConnectionSettings != false) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-
-                        val serverAddr by viewModel.serverAddr.observeAsState()
-                        val serverPort by viewModel.serverPort.observeAsState()
-                        val password by viewModel.password.observeAsState()
-
-                        TextField(
-                            value = serverAddr ?: "",
-                            label = { Text(stringResource(R.string.server_addr)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            onValueChange = {
-                                viewModel.serverAddr.setIfChanged(it)
-                                viewModel.postGetCurrentVolume()
-                            },
-                            colors = textFieldColors(
-                                textColor = MaterialTheme.colors.onBackground,
-                            )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = showConnectionSettings ?: true,
+                            onCheckedChange = { viewModel.showConnectionSettings.value = it },
+                            modifier = Modifier.height(40.dp),
+                            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
                         )
-
                         Gap(4.dp)
-
-                        TextField(
-                            value = serverPort ?: "",
-                            label = { Text(stringResource(R.string.server_port)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            onValueChange = {
-                                viewModel.serverPort.setIfChanged(it)
-                                viewModel.postGetCurrentVolume()
-                            },
-                            colors = textFieldColors(
-                                textColor = MaterialTheme.colors.onBackground,
-                            )
+                        Text(
+                            text = stringResource(id = R.string.show_settings),
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colors.onBackground,
                         )
+                    }
+                    AnimatedVisibility(visible = showConnectionSettings != false) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
 
-                        Gap(4.dp)
+                            val serverAddr by viewModel.serverAddr.observeAsState()
+                            val serverPort by viewModel.serverPort.observeAsState()
+                            val password by viewModel.password.observeAsState()
 
-                        var showPassword by remember { mutableStateOf(false) }
-                        TextField(
-                            value = password ?: "",
-                            visualTransformation = if (showPassword)
-                                VisualTransformation.None
-                            else
-                                PasswordVisualTransformation(),
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = { showPassword = !showPassword }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Visibility,
-                                        contentDescription = stringResource(id = R.string.password_showing_toggle),
-                                    )
-                                }
-                            },
-                            label = { Text(stringResource(R.string.password)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            onValueChange = {
-                                viewModel.password.setIfChanged(it)
-                                viewModel.postGetCurrentVolume()
-                            },
-                            colors = textFieldColors(
-                                textColor = MaterialTheme.colors.onBackground,
-                            )
-                        )
-
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            TriStateCheckbox(
-                                state = when (darkTheme) {
-                                    null -> ToggleableState.Indeterminate
-                                    false -> ToggleableState.Off
-                                    else -> ToggleableState.On
+                            TextField(
+                                value = serverAddr ?: "",
+                                label = { Text(stringResource(R.string.server_addr)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                onValueChange = {
+                                    viewModel.serverAddr.setIfChanged(it)
+                                    viewModel.postGetCurrentVolume()
                                 },
-                                onClick = {
-                                    viewModel.darkTheme.value = when (darkTheme) {
-                                        null -> false
-                                        false -> true
-                                        true -> null
+                                colors = textFieldColors(
+                                    textColor = MaterialTheme.colors.onBackground,
+                                )
+                            )
+
+                            Gap(4.dp)
+
+                            TextField(
+                                value = serverPort ?: "",
+                                label = { Text(stringResource(R.string.server_port)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                onValueChange = {
+                                    viewModel.serverPort.setIfChanged(it)
+                                    viewModel.postGetCurrentVolume()
+                                },
+                                colors = textFieldColors(
+                                    textColor = MaterialTheme.colors.onBackground,
+                                )
+                            )
+
+                            Gap(4.dp)
+
+                            var showPassword by remember { mutableStateOf(false) }
+                            TextField(
+                                value = password ?: "",
+                                visualTransformation = if (showPassword)
+                                    VisualTransformation.None
+                                else
+                                    PasswordVisualTransformation(),
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = { showPassword = !showPassword }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Visibility,
+                                            contentDescription = stringResource(id = R.string.password_showing_toggle),
+                                        )
                                     }
                                 },
-                                modifier = Modifier.height(40.dp),
-                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
+                                label = { Text(stringResource(R.string.password)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                onValueChange = {
+                                    viewModel.password.setIfChanged(it)
+                                    viewModel.postGetCurrentVolume()
+                                },
+                                colors = textFieldColors(
+                                    textColor = MaterialTheme.colors.onBackground,
+                                )
                             )
-                            Gap(4.dp)
-                            Text(
-                                text = stringResource(id = R.string.dark_theme),
-                                modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colors.onBackground,
-                            )
-                        }
 
-                        Gap(4.dp)
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = showTitleBarState.value ?: true,
-                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
-                                onCheckedChange = {
-                                    viewModel.setShowTitleBar(it)
-                                }
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                TriStateCheckbox(
+                                    state = when (darkTheme) {
+                                        null -> ToggleableState.Indeterminate
+                                        false -> ToggleableState.Off
+                                        else -> ToggleableState.On
+                                    },
+                                    onClick = {
+                                        viewModel.darkTheme.value = when (darkTheme) {
+                                            null -> false
+                                            false -> true
+                                            true -> null
+                                        }
+                                    },
+                                    modifier = Modifier.height(40.dp),
+                                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary)
+                                )
+                                Gap(4.dp)
+                                Text(
+                                    text = stringResource(id = R.string.dark_theme),
+                                    modifier = Modifier.weight(1f),
+                                    color = MaterialTheme.colors.onBackground,
+                                )
+                            }
+
                             Gap(4.dp)
-                            Text(
-                                text = stringResource(id = R.string.title_bar),
-                                modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colors.onBackground,
-                            )
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = showTitleBarState.value ?: true,
+                                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
+                                    onCheckedChange = {
+                                        viewModel.setShowTitleBar(it)
+                                    }
+                                )
+                                Gap(4.dp)
+                                Text(
+                                    text = stringResource(id = R.string.title_bar),
+                                    modifier = Modifier.weight(1f),
+                                    color = MaterialTheme.colors.onBackground,
+                                )
+                            }
                         }
                     }
-                }
 
-                Gap(8.dp)
+                    Gap(8.dp)
 
-                val textResAndArgs by viewModel.error.observeAsState()
-                Text(
-                    text = textResAndArgs?.toString(resources()) ?: "",
-                    modifier = Modifier.fillMaxWidth(),
-                    color = if (textResAndArgs?.resId == R.string.connected)
-                        MaterialTheme.colors.onBackground
-                    else
-                        MaterialTheme.colors.error,
-                )
-
-                Gap(8.dp)
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    val deviceName by viewModel.deviceName.observeAsState()
+                    val textResAndArgs by viewModel.error.observeAsState()
                     Text(
-                        text = deviceName ?: "",
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colors.onBackground,
-                        textAlign = TextAlign.End
-                    )
-
-                    Gap(4.dp)
-
-                    IconButton(
-                        onClick = { viewModel.postGetCurrentVolume() },
-                        modifier = Modifier
-                            .background(color = MaterialTheme.colors.secondary)
-                            // IconButtonのサイズ変更はthenを挟む必要がある
-                            .then(Modifier.size(40.dp)),
-                    ) {
-                        Icon(
-                            Icons.Outlined.Refresh,
-                            contentDescription = stringResource(R.string.refresh),
-                            tint = MaterialTheme.colors.onSecondary
-                        )
-                    }
-                }
-
-                val volumeBarPos by viewModel.volumeBarPos.observeAsState()
-                val volumeDb by viewModel.volumeDb.observeAsState()
-
-                Slider(
-                    value = volumeBarPos ?: 0.5f,
-                    onValueChange = {
-                        viewModel.volumeBarPos.value = it
-                    },
-                    onValueChangeFinished = {
-                        val newDb = seekBarPositionToVolumeDb(viewModel.volumeBarPos.value ?: 0f)
-                        val oldDb = viewModel.volumeDb.value
-                        if (newDb != oldDb) {
-                            viewModel.setVolume(newDb)
-                        }
-                    },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = volumeDb?.let { "${it}dB" } ?: "",
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.End,
-                        color = MaterialTheme.colors.onBackground,
-                        fontSize = 20.sp,
+                        text = textResAndArgs?.toString(resources()) ?: "",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = if (textResAndArgs?.resId == R.string.connected)
+                            MaterialTheme.colors.onBackground
+                        else
+                            MaterialTheme.colors.error,
                     )
 
                     Gap(8.dp)
 
-                    IconButton(
-                        onClick = { viewModel.setVolume((volumeDb ?: 0f) - 0.5f) },
-                        modifier = Modifier
-                            .background(color = MaterialTheme.colors.secondary)
-                            // IconButtonのサイズ変更はthenを挟む必要がある
-                            .then(Modifier.size(40.dp)),
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Icon(
-                            Icons.Outlined.ChevronLeft,
-                            contentDescription = stringResource(R.string.decrement),
-                            tint = MaterialTheme.colors.onSecondary
+                        val deviceName by viewModel.deviceName.observeAsState()
+                        Text(
+                            text = deviceName ?: "",
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colors.onBackground,
+                            textAlign = TextAlign.End
                         )
-                    }
 
-                    Gap(10.dp)
+                        Gap(4.dp)
 
-                    IconButton(
-                        onClick = { viewModel.setVolume((volumeDb ?: 0f) + 0.5f) },
-                        modifier = Modifier
-                            .background(color = MaterialTheme.colors.secondary)
-                            // IconButtonのサイズ変更はthenを挟む必要がある
-                            .then(Modifier.size(40.dp)),
-                    ) {
-                        Icon(
-                            Icons.Outlined.ChevronRight,
-                            contentDescription = stringResource(R.string.increment),
-                            tint = MaterialTheme.colors.onSecondary
-                        )
-                    }
-                }
-
-                Gap(8.dp)
-
-                Text(
-                    text = stringResource(id = R.string.presets_title),
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colors.onBackground,
-                )
-
-                Box(Modifier.fillMaxSize()) {
-                    FlowRow(
-                        crossAxisSpacing = 4.dp
-                    ) {
-                        val presets by viewModel.presets.observeAsState()
-
-                        @Composable
-                        fun createButton(
-                            text: String,
-                            onClick: () -> Unit,
-                            onLongClick: (() -> Unit)? = null
+                        IconButton(
+                            onClick = { viewModel.postGetCurrentVolume() },
+                            modifier = Modifier
+                                .background(color = MaterialTheme.colors.secondary)
+                                // IconButtonのサイズ変更はthenを挟む必要がある
+                                .then(Modifier.size(40.dp)),
                         ) {
-                            val buttonHeight = 40.dp
+                            Icon(
+                                Icons.Outlined.Refresh,
+                                contentDescription = stringResource(R.string.refresh),
+                                tint = MaterialTheme.colors.onSecondary
+                            )
+                        }
+                    }
 
-                            Box(
-                                modifier = Modifier
-                                    .background(MaterialTheme.colors.secondary)
-                                    .height(buttonHeight)
-                                    .combinedClickable(
-                                        onClick = onClick,
-                                        onLongClick = onLongClick,
-                                    ),
-                            ) {
-                                Text(
-                                    text = text,
-                                    color = MaterialTheme.colors.onSecondary,
-                                    fontSize = with(LocalDensity.current) {
-                                        (buttonHeight * 0.67f).toSp()
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .padding(horizontal = (buttonHeight * 0.3f)),
-                                )
+                    val volumeBarPos by viewModel.volumeBarPos.observeAsState()
+                    val volumeDb by viewModel.volumeDb.observeAsState()
+
+                    Slider(
+                        value = volumeBarPos ?: 0.5f,
+                        onValueChange = {
+                            viewModel.volumeBarPos.value = it
+                        },
+                        onValueChangeFinished = {
+                            val newDb =
+                                seekBarPositionToVolumeDb(viewModel.volumeBarPos.value ?: 0f)
+                            val oldDb = viewModel.volumeDb.value
+                            if (newDb != oldDb) {
+                                viewModel.setVolume(newDb)
                             }
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = volumeDb?.let { "${it}dB" } ?: "",
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.End,
+                            color = MaterialTheme.colors.onBackground,
+                            fontSize = 20.sp,
+                        )
+
+                        Gap(8.dp)
+
+                        IconButton(
+                            onClick = { viewModel.setVolume((volumeDb ?: 0f) - 0.5f) },
+                            modifier = Modifier
+                                .background(color = MaterialTheme.colors.secondary)
+                                // IconButtonのサイズ変更はthenを挟む必要がある
+                                .then(Modifier.size(40.dp)),
+                        ) {
+                            Icon(
+                                Icons.Outlined.ChevronLeft,
+                                contentDescription = stringResource(R.string.decrement),
+                                tint = MaterialTheme.colors.onSecondary
+                            )
                         }
 
-                        createButton(
-                            text = stringResource(id = R.string.plus_punk),
-                            onClick = { viewModel.addPreset(viewModel.volumeDb.value ?: 0f) }
-                        )
-                        presets?.forEach { it ->
-                            SpacerH(4.dp)
-                            createButton(
-                                text = it.toString(),
-                                onClick = { viewModel.setVolume(it, callApi = true) },
-                                onLongClick = { viewModel.removePreset(it) },
+                        Gap(10.dp)
+
+                        IconButton(
+                            onClick = { viewModel.setVolume((volumeDb ?: 0f) + 0.5f) },
+                            modifier = Modifier
+                                .background(color = MaterialTheme.colors.secondary)
+                                // IconButtonのサイズ変更はthenを挟む必要がある
+                                .then(Modifier.size(40.dp)),
+                        ) {
+                            Icon(
+                                Icons.Outlined.ChevronRight,
+                                contentDescription = stringResource(R.string.increment),
+                                tint = MaterialTheme.colors.onSecondary
                             )
+                        }
+                    }
+
+                    Gap(8.dp)
+
+                    Text(
+                        text = stringResource(id = R.string.presets_title),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colors.onBackground,
+                    )
+
+                    Box(Modifier.fillMaxSize()) {
+                        FlowRow(
+                            crossAxisSpacing = 4.dp
+                        ) {
+                            val presets by viewModel.presets.observeAsState()
+
+                            @Composable
+                            fun createButton(
+                                text: String,
+                                onClick: () -> Unit,
+                                onLongClick: (() -> Unit)? = null
+                            ) {
+                                val buttonHeight = 40.dp
+
+                                Box(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colors.secondary)
+                                        .height(buttonHeight)
+                                        .combinedClickable(
+                                            onClick = onClick,
+                                            onLongClick = onLongClick,
+                                        ),
+                                ) {
+                                    Text(
+                                        text = text,
+                                        color = MaterialTheme.colors.onSecondary,
+                                        fontSize = with(LocalDensity.current) {
+                                            (buttonHeight * 0.67f).toSp()
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(horizontal = (buttonHeight * 0.3f)),
+                                    )
+                                }
+                            }
+
+                            createButton(
+                                text = stringResource(id = R.string.plus_punk),
+                                onClick = { viewModel.addPreset(viewModel.volumeDb.value ?: 0f) }
+                            )
+                            presets?.forEach { it ->
+                                SpacerH(4.dp)
+                                createButton(
+                                    text = it.toString(),
+                                    onClick = { viewModel.setVolume(it, callApi = true) },
+                                    onLongClick = { viewModel.removePreset(it) },
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
+        )
     }
 }
