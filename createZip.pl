@@ -10,8 +10,8 @@ system qq(./buildServer.bat) and die;
 # build AndroidClient
 {
 	my $dir =pushd("AndroidClient");
-	system qq(./gradlew.bat clean) and die;
-	system qq(./gradlew.bat assembleRelease) and die;
+	system qq(./gradlew.bat --console=plain clean) and die;
+	system qq(./gradlew.bat --console=plain assembleRelease) and die;
 }
 
 my @lt = localtime;
