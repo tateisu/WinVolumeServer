@@ -30,7 +30,8 @@ namespace WinVolumeServer {
                 var httpServer = new WebServer(
                         o => o.WithUrlPrefix(url).WithMode(HttpListenerMode.EmbedIO)
                     )
-                    .WithWebApi("/volume", m => m.WithController<VolumeApi>())
+                    .WithWebApi("/volume", m => m.WithController<ApiVolume>())
+                    .WithWebApi( "/media", m => m.WithController<ApiMedia>() )
                     .WithModule(new ActionModule("/", HttpVerbs.Any, ctx => {
                         ctx.Response.StatusCode = (int) HttpStatusCode.NotFound;
                         return ctx.SendStringAsync("not found", "text/plain", System.Text.Encoding.UTF8);

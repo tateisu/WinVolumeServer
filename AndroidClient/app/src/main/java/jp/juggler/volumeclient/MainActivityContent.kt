@@ -239,6 +239,7 @@ fun MainActivityContent(
 
                     Gap(8.dp)
 
+                    @Composable
                     fun incButtonStyle() =
                         Modifier.background(color = MaterialTheme.colors.secondary)
                             // IconButtonのサイズ変更はthenを挟む必要がある
@@ -351,50 +352,99 @@ fun MainActivityContent(
                         color = MaterialTheme.colors.onBackground,
                     )
 
-                    Box(Modifier.fillMaxSize()) {
-                        FlowRow(crossAxisSpacing = 4.dp) {
-                            val presets by viewModel.presets.observeAsState()
+                    FlowRow(crossAxisSpacing = 4.dp) {
+                        val presets by viewModel.presets.observeAsState()
 
-                            @Composable
-                            fun createButton(
-                                text: String,
-                                onClick: () -> Unit,
-                                onLongClick: (() -> Unit)? = null
+                        @Composable
+                        fun createButton(
+                            text: String,
+                            onClick: () -> Unit,
+                            onLongClick: (() -> Unit)? = null
+                        ) {
+                            val volumeButtonHeight = 40.dp
+                            Box(
+                                modifier = Modifier
+                                    .background(MaterialTheme.colors.secondary)
+                                    .height(volumeButtonHeight)
+                                    .combinedClickable(
+                                        onClick = onClick,
+                                        onLongClick = onLongClick,
+                                    ),
                             ) {
-                                val volumeButtonHeight = 40.dp
-                                Box(
+                                Text(
+                                    text = text,
+                                    color = MaterialTheme.colors.onSecondary,
+                                    fontSize = with(LocalDensity.current) {
+                                        (volumeButtonHeight * 0.67f).toSp()
+                                    },
                                     modifier = Modifier
-                                        .background(MaterialTheme.colors.secondary)
-                                        .height(volumeButtonHeight)
-                                        .combinedClickable(
-                                            onClick = onClick,
-                                            onLongClick = onLongClick,
-                                        ),
-                                ) {
-                                    Text(
-                                        text = text,
-                                        color = MaterialTheme.colors.onSecondary,
-                                        fontSize = with(LocalDensity.current) {
-                                            (volumeButtonHeight * 0.67f).toSp()
-                                        },
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .padding(horizontal = (volumeButtonHeight * 0.3f)),
-                                    )
-                                }
-                            }
-
-                            createButton(
-                                text = stringResource(id = R.string.plus_punk),
-                                onClick = { viewModel.addPreset(viewModel.volumeDb.value ?: 0f) }
-                            )
-                            presets?.forEach { it ->
-                                SpacerH(4.dp)
-                                createButton(
-                                    text = it.toString(),
-                                    onClick = { viewModel.setVolume(it, callApi = true) },
-                                    onLongClick = { viewModel.removePreset(it) },
+                                        .align(Alignment.Center)
+                                        .padding(horizontal = (volumeButtonHeight * 0.3f)),
                                 )
+                            }
+                        }
+
+                        createButton(
+                            text = stringResource(id = R.string.plus_punk),
+                            onClick = { viewModel.addPreset(viewModel.volumeDb.value ?: 0f) }
+                        )
+                        presets?.forEach { it ->
+                            SpacerH(4.dp)
+                            createButton(
+                                text = it.toString(),
+                                onClick = { viewModel.setVolume(it, callApi = true) },
+                                onLongClick = { viewModel.removePreset(it) },
+                            )
+                        }
+                    }
+
+                    Gap(8.dp)
+
+                    Text(
+                        text = stringResource(id = R.string.media_control),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colors.onBackground,
+                    )
+
+                    FlowRow(crossAxisSpacing = 4.dp) {
+                        MediaControl.valuesCache.forEachIndexed() { i, m ->
+                            if (i != 0) SpacerH(4.dp)
+                            val text =  stringResource(m.nameId)
+                            when (val icon =m.icon) {
+                                null -> {
+                                    val mediaButtonHeight = 40.dp
+                                    Box(
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colors.secondary)
+                                            .height(mediaButtonHeight)
+                                            .combinedClickable(
+                                                onClick =  { viewModel.mediaControl(m) },
+                                            ),
+                                    ) {
+                                        Text(
+                                            text =  text,
+                                            color = MaterialTheme.colors.onSecondary,
+                                            fontSize = with(LocalDensity.current) {
+                                                (mediaButtonHeight * 0.67f).toSp()
+                                            },
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .padding(horizontal = (mediaButtonHeight * 0.3f)),
+                                        )
+                                    }
+                                }
+                                else -> {
+                                    IconButton(
+                                        onClick = { viewModel.mediaControl(m) },
+                                        modifier = incButtonStyle(),
+                                    ) {
+                                        Icon(
+                                            icon,
+                                            contentDescription = text,
+                                            tint = MaterialTheme.colors.onSecondary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

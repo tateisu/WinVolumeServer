@@ -1,5 +1,6 @@
 package jp.juggler.volumeclient
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
@@ -17,6 +18,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.loadOrRestore()
+        viewModel.mediaError.observe(this) {
+            AlertDialog.Builder(this)
+                .setMessage("${it.javaClass.simpleName} : ${it.message}")
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
         setContent { MainActivityContent(window, viewModel) }
     }
 

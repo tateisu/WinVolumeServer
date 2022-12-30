@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference
  * サーバへのアクセスを順次行う。並列実行しない。
  */
 class SequentialUpdater(
+    val onMediaError:(Throwable)->Unit,
     val onError: (StringResAndArgs) -> Unit,
     val handleGetResult: (String, Float) -> Unit
 ) {
@@ -110,6 +111,33 @@ class SequentialUpdater(
         this.volumeDb.set(volumeDb)
         willSet.set(true)
         send()
+    }
+
+    suspend fun postMedia(m: MediaControl) {
+        try {
+            withContext(Dispatchers.IO) {
+                val url = "http://${addr}:${port}/media?a=${m.keySpec}"
+                val request = Request.Builder()
+                    .url(url)
+                    .also { embedPassword(it) }
+                    .method(
+                        "POST",
+                        "".toRequestBody("application/x-www-form-urlencoded".toMediaType())
+                    )
+                    .build()
+                val response = client.newCall(request).enqueueAndAwait()
+                if (response.isSuccessful) return@withContext
+                val bodyString = response.body?.string()
+                error("$bodyString\n${response.code} ${response.message}\n${request.method} ${request.url}")
+            }
+        }catch (ex:Throwable) {
+            log.e(ex,"postMedia failed.")
+            if(ex !is CancellationException) {
+                withContext(Dispatchers.Main.immediate) {
+                    onMediaError(ex)
+                }
+            }
+        }
     }
 
     init {

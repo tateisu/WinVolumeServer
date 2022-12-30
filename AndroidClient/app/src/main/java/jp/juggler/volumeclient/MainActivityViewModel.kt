@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hadilq.liveevent.LiveEvent
 import jp.juggler.volumeclient.utils.EmptyScope
 import jp.juggler.volumeclient.utils.LogTag
 import jp.juggler.volumeclient.utils.StringResAndArgs
@@ -14,7 +15,7 @@ import kotlin.math.abs
 
 interface MainActivityViewModel {
     // tri-value: boolean or null
-    val darkTheme: MutableLiveData<Boolean?>
+    val darkTheme: MutableLiveData<Boolean>
     val showConnectionSettings: MutableLiveData<Boolean>
     val serverAddr: MutableLiveData<String>
     val serverPort: MutableLiveData<String>
@@ -25,17 +26,19 @@ interface MainActivityViewModel {
     val presets: MutableLiveData<List<Float>>
     val deviceName: MutableLiveData<String>
     val showTitleBar: MutableLiveData<Boolean>
+    val mediaError: LiveEvent<Throwable>
 
     fun postGetCurrentVolume()
     fun setVolume(v: Float, callApi: Boolean = true)
     fun addPreset(v: Float)
     fun removePreset(v: Float)
     fun setShowTitleBar(v: Boolean)
+    fun mediaControl(m: MediaControl)
 }
 
 // Jetpack Compose のIDEプレビュー用
 object MainActivityViewModelStub : MainActivityViewModel {
-    override val darkTheme = MutableLiveData<Boolean?>(null)
+    override val darkTheme = MutableLiveData<Boolean>(null)
     override val showConnectionSettings = MutableLiveData(true)
     override val serverAddr = MutableLiveData("X.X.X.X")
     override val serverPort = MutableLiveData("2021")
@@ -48,11 +51,14 @@ object MainActivityViewModelStub : MainActivityViewModel {
     override val presets = MutableLiveData(listOf(-30f, -15f, 0f))
     override val deviceName = MutableLiveData("device name")
     override val showTitleBar = MutableLiveData(true)
+    override val mediaError = LiveEvent<Throwable>()
+
     override fun postGetCurrentVolume() = Unit
     override fun setVolume(v: Float, callApi: Boolean) = Unit
     override fun addPreset(v: Float) = Unit
     override fun removePreset(v: Float) = Unit
     override fun setShowTitleBar(v: Boolean) = Unit
+    override fun mediaControl(m: MediaControl) = Unit
 }
 
 // 実際の実装
@@ -89,7 +95,7 @@ class MainActivityViewModelImpl(
         Context.MODE_PRIVATE
     )
 
-    override val darkTheme = MutableLiveData<Boolean?>()
+    override val darkTheme = MutableLiveData<Boolean>()
     override val showConnectionSettings = MutableLiveData<Boolean>()
     override val serverAddr = MutableLiveData<String>()
     override val serverPort = MutableLiveData<String>()
@@ -100,10 +106,11 @@ class MainActivityViewModelImpl(
     override val presets = MutableLiveData<List<Float>>()
     override val deviceName = MutableLiveData<String>()
     override val showTitleBar = MutableLiveData(true)
-
+    override val mediaError = LiveEvent<Throwable>()
     private var isCleared = false
 
     private val updater = SequentialUpdater(
+        onMediaError = { mediaError.value = it },
         onError = {
             if (!this.isCleared) {
                 error.value = it
@@ -206,5 +213,11 @@ class MainActivityViewModelImpl(
     override fun setShowTitleBar(v: Boolean) {
         showTitleBar.value = v
         save()
+    }
+
+    override fun mediaControl(m: MediaControl) {
+        viewModelScope.launch {
+            updater.postMedia(m)
+        }
     }
 }

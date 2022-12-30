@@ -59,7 +59,7 @@ namespace WinVolumeServer
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbServerPrefix.Location = new System.Drawing.Point(115, 14);
             this.tbServerPrefix.Name = "tbServerPrefix";
-            this.tbServerPrefix.Size = new System.Drawing.Size(66, 19);
+            this.tbServerPrefix.Size = new System.Drawing.Size(205, 19);
             this.tbServerPrefix.TabIndex = 1;
             this.tbServerPrefix.TextChanged += new System.EventHandler(this.tbServerPrefix_TextChanged);
             // 
@@ -73,14 +73,14 @@ namespace WinVolumeServer
             this.tbServerError.Name = "tbServerError";
             this.tbServerError.ReadOnly = true;
             this.tbServerError.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbServerError.Size = new System.Drawing.Size(235, 49);
+            this.tbServerError.Size = new System.Drawing.Size(374, 90);
             this.tbServerError.TabIndex = 2;
             // 
             // btnServerRestart
             // 
             this.btnServerRestart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnServerRestart.AutoSize = true;
-            this.btnServerRestart.Location = new System.Drawing.Point(187, 12);
+            this.btnServerRestart.Location = new System.Drawing.Point(326, 12);
             this.btnServerRestart.Name = "btnServerRestart";
             this.btnServerRestart.Size = new System.Drawing.Size(64, 22);
             this.btnServerRestart.TabIndex = 3;
@@ -90,7 +90,7 @@ namespace WinVolumeServer
             // 
             // labelAudioDevice
             // 
-            this.labelAudioDevice.Location = new System.Drawing.Point(14, 123);
+            this.labelAudioDevice.Location = new System.Drawing.Point(14, 164);
             this.labelAudioDevice.Name = "labelAudioDevice";
             this.labelAudioDevice.Size = new System.Drawing.Size(118, 25);
             this.labelAudioDevice.TabIndex = 4;
@@ -101,18 +101,18 @@ namespace WinVolumeServer
             // 
             this.tbAudioDevice.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbAudioDevice.Location = new System.Drawing.Point(16, 151);
+            this.tbAudioDevice.Location = new System.Drawing.Point(16, 192);
             this.tbAudioDevice.Multiline = true;
             this.tbAudioDevice.Name = "tbAudioDevice";
             this.tbAudioDevice.ReadOnly = true;
             this.tbAudioDevice.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbAudioDevice.Size = new System.Drawing.Size(235, 54);
+            this.tbAudioDevice.Size = new System.Drawing.Size(374, 54);
             this.tbAudioDevice.TabIndex = 5;
             // 
             // btnAudioDeviceCheck
             // 
             this.btnAudioDeviceCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAudioDeviceCheck.Location = new System.Drawing.Point(187, 123);
+            this.btnAudioDeviceCheck.Location = new System.Drawing.Point(326, 164);
             this.btnAudioDeviceCheck.Name = "btnAudioDeviceCheck";
             this.btnAudioDeviceCheck.Size = new System.Drawing.Size(64, 25);
             this.btnAudioDeviceCheck.TabIndex = 6;
@@ -122,7 +122,7 @@ namespace WinVolumeServer
             // 
             // labelVolume
             // 
-            this.labelVolume.Location = new System.Drawing.Point(14, 216);
+            this.labelVolume.Location = new System.Drawing.Point(14, 257);
             this.labelVolume.Name = "labelVolume";
             this.labelVolume.Size = new System.Drawing.Size(95, 19);
             this.labelVolume.TabIndex = 7;
@@ -133,16 +133,16 @@ namespace WinVolumeServer
             // 
             this.tbVolume.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbVolume.Location = new System.Drawing.Point(115, 216);
+            this.tbVolume.Location = new System.Drawing.Point(115, 257);
             this.tbVolume.Name = "tbVolume";
-            this.tbVolume.Size = new System.Drawing.Size(77, 19);
+            this.tbVolume.Size = new System.Drawing.Size(216, 19);
             this.tbVolume.TabIndex = 8;
             // 
             // btnVolume
             // 
             this.btnVolume.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnVolume.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnVolume.Location = new System.Drawing.Point(198, 211);
+            this.btnVolume.Location = new System.Drawing.Point(337, 252);
             this.btnVolume.Name = "btnVolume";
             this.btnVolume.Size = new System.Drawing.Size(53, 28);
             this.btnVolume.TabIndex = 9;
@@ -152,7 +152,7 @@ namespace WinVolumeServer
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(14, 92);
+            this.label1.Location = new System.Drawing.Point(14, 133);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(59, 19);
             this.label1.TabIndex = 10;
@@ -163,9 +163,9 @@ namespace WinVolumeServer
             // 
             this.tbPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbPassword.Location = new System.Drawing.Point(79, 92);
+            this.tbPassword.Location = new System.Drawing.Point(79, 133);
             this.tbPassword.Name = "tbPassword";
-            this.tbPassword.Size = new System.Drawing.Size(172, 19);
+            this.tbPassword.Size = new System.Drawing.Size(311, 19);
             this.tbPassword.TabIndex = 11;
             this.tbPassword.TextChanged += new System.EventHandler(this.tbPassword_TextChanged);
             // 
@@ -173,7 +173,7 @@ namespace WinVolumeServer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(263, 276);
+            this.ClientSize = new System.Drawing.Size(402, 301);
             this.Controls.Add(this.tbPassword);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnVolume);
