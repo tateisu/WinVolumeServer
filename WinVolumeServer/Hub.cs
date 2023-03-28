@@ -1,11 +1,6 @@
 ﻿#nullable enable
 #pragma warning disable IDE1006
 
-using System;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace WinVolumeServer {
@@ -13,11 +8,12 @@ namespace WinVolumeServer {
         public static readonly Pref pref = new Pref();
         public static readonly MyHttpServer httpServer = new MyHttpServer();
         public static readonly NotifyIconHolder iconHolder = new NotifyIconHolder();
+        public static readonly VoiceMeeterClient voiceMeeter = new VoiceMeeterClient();
+
         public static Form1? form1;
 
-        internal static void startServer() {
-            httpServer.start(pref.serverPrefix);
-        }
+        internal static void startServer() => 
+            httpServer.start( pref.serverPrefix );
 
         private static void closeForm() {
             form1?.Close();
@@ -34,14 +30,15 @@ namespace WinVolumeServer {
             closeForm();
             iconHolder.stop();
             httpServer.stop();
+            voiceMeeter.Dispose();
             Application.Exit();
         }
 
         public static void onMenuConfig() {
             closeForm();
-            var form = new Form1();
-            form.Visible = true;
-            form1 = form;
+            form1 = new Form1 {
+                Visible = true
+            };
         }
     }
 }

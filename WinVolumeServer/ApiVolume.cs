@@ -4,9 +4,7 @@
 using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
-using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -20,7 +18,7 @@ namespace WinVolumeServer {
         [Route( HttpVerbs.Post, "/" )]
         public Task volumePost([QueryField] string v, [FormData] NameValueCollection form) =>
             checkPassword( () => {
-                if (!float.TryParse( v, out float volumeFloat )) {
+                if (!float.TryParse( v, out var volumeFloat )) {
                     return stringResponse( "invalid parameter 'v'", HttpStatusCode.BadRequest );
                 }
                 Volume.setVolume( volumeFloat );

@@ -42,6 +42,8 @@ namespace WinVolumeServer
             this.btnVolume = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tbPassword = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tbVoiceMeeterGain = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // labelServer
@@ -59,7 +61,7 @@ namespace WinVolumeServer
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbServerPrefix.Location = new System.Drawing.Point(115, 14);
             this.tbServerPrefix.Name = "tbServerPrefix";
-            this.tbServerPrefix.Size = new System.Drawing.Size(205, 19);
+            this.tbServerPrefix.Size = new System.Drawing.Size(233, 19);
             this.tbServerPrefix.TabIndex = 1;
             this.tbServerPrefix.TextChanged += new System.EventHandler(this.tbServerPrefix_TextChanged);
             // 
@@ -73,14 +75,14 @@ namespace WinVolumeServer
             this.tbServerError.Name = "tbServerError";
             this.tbServerError.ReadOnly = true;
             this.tbServerError.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbServerError.Size = new System.Drawing.Size(374, 90);
+            this.tbServerError.Size = new System.Drawing.Size(402, 90);
             this.tbServerError.TabIndex = 2;
             // 
             // btnServerRestart
             // 
             this.btnServerRestart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnServerRestart.AutoSize = true;
-            this.btnServerRestart.Location = new System.Drawing.Point(326, 12);
+            this.btnServerRestart.Location = new System.Drawing.Point(354, 12);
             this.btnServerRestart.Name = "btnServerRestart";
             this.btnServerRestart.Size = new System.Drawing.Size(64, 22);
             this.btnServerRestart.TabIndex = 3;
@@ -106,13 +108,13 @@ namespace WinVolumeServer
             this.tbAudioDevice.Name = "tbAudioDevice";
             this.tbAudioDevice.ReadOnly = true;
             this.tbAudioDevice.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbAudioDevice.Size = new System.Drawing.Size(374, 54);
+            this.tbAudioDevice.Size = new System.Drawing.Size(402, 54);
             this.tbAudioDevice.TabIndex = 5;
             // 
             // btnAudioDeviceCheck
             // 
             this.btnAudioDeviceCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAudioDeviceCheck.Location = new System.Drawing.Point(326, 164);
+            this.btnAudioDeviceCheck.Location = new System.Drawing.Point(354, 164);
             this.btnAudioDeviceCheck.Name = "btnAudioDeviceCheck";
             this.btnAudioDeviceCheck.Size = new System.Drawing.Size(64, 25);
             this.btnAudioDeviceCheck.TabIndex = 6;
@@ -135,14 +137,14 @@ namespace WinVolumeServer
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbVolume.Location = new System.Drawing.Point(115, 257);
             this.tbVolume.Name = "tbVolume";
-            this.tbVolume.Size = new System.Drawing.Size(216, 19);
+            this.tbVolume.Size = new System.Drawing.Size(244, 19);
             this.tbVolume.TabIndex = 8;
             // 
             // btnVolume
             // 
             this.btnVolume.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnVolume.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnVolume.Location = new System.Drawing.Point(337, 252);
+            this.btnVolume.Location = new System.Drawing.Point(365, 252);
             this.btnVolume.Name = "btnVolume";
             this.btnVolume.Size = new System.Drawing.Size(53, 28);
             this.btnVolume.TabIndex = 9;
@@ -165,15 +167,36 @@ namespace WinVolumeServer
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbPassword.Location = new System.Drawing.Point(79, 133);
             this.tbPassword.Name = "tbPassword";
-            this.tbPassword.Size = new System.Drawing.Size(311, 19);
+            this.tbPassword.Size = new System.Drawing.Size(339, 19);
             this.tbPassword.TabIndex = 11;
             this.tbPassword.TextChanged += new System.EventHandler(this.tbPassword_TextChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(14, 290);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(146, 12);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "VoiceMeeterのGainプロパティ";
+            // 
+            // tbVoiceMeeterGain
+            // 
+            this.tbVoiceMeeterGain.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbVoiceMeeterGain.Location = new System.Drawing.Point(166, 287);
+            this.tbVoiceMeeterGain.Name = "tbVoiceMeeterGain";
+            this.tbVoiceMeeterGain.Size = new System.Drawing.Size(252, 19);
+            this.tbVoiceMeeterGain.TabIndex = 13;
+            this.tbVoiceMeeterGain.TextChanged += new System.EventHandler(this.tbVoiceMeeterGain_TextChanged);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(402, 301);
+            this.ClientSize = new System.Drawing.Size(430, 371);
+            this.Controls.Add(this.tbVoiceMeeterGain);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.tbPassword);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnVolume);
@@ -210,6 +233,8 @@ namespace WinVolumeServer
         private System.Windows.Forms.Button btnVolume;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tbPassword;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox tbVoiceMeeterGain;
     }
 }
 

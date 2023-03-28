@@ -68,10 +68,10 @@ namespace WinVolumeServer {
             public HardwareInput Hardware;
         }
 
-        private const int KEYEVENTF_EXTENDEDKEY = 0x0001;
+        //private const int KEYEVENTF_EXTENDEDKEY = 0x0001;
         private const int KEYEVENTF_KEYUP = 0x0002;
-        private const int KEYEVENTF_SCANCODE = 0x0008;
-        private const int KEYEVENTF_UNICODE = 0x0004;
+        //private const int KEYEVENTF_SCANCODE = 0x0008;
+        //private const int KEYEVENTF_UNICODE = 0x0004;
 
         private const int MAPVK_VK_TO_VSC = 0;
         // private const int MAPVK_VSC_TO_VK = 1;
@@ -88,20 +88,22 @@ namespace WinVolumeServer {
         }
 
         private static void SendInputKeyPressAndRelease(Keys key) {
-            Input[] inputs = new Input[ 2 ];
+            var inputs = new Input[ 2 ];
 
-            int vsc = NativeMethods.MapVirtualKey( (int)key, MAPVK_VK_TO_VSC );
+            var vsc = NativeMethods.MapVirtualKey( (int)key, MAPVK_VK_TO_VSC );
 
-            inputs[ 0 ] = new Input();
-            inputs[ 0 ].Type = 1; // KeyBoard = 1
+            inputs[ 0 ] = new Input {
+                Type = 1 // KeyBoard = 1
+            };
             inputs[ 0 ].ui.Keyboard.VirtualKey = (short)key;
             inputs[ 0 ].ui.Keyboard.ScanCode = (short)vsc;
             inputs[ 0 ].ui.Keyboard.Flags = 0;
             inputs[ 0 ].ui.Keyboard.Time = 0;
             inputs[ 0 ].ui.Keyboard.ExtraInfo = IntPtr.Zero;
 
-            inputs[ 1 ] = new Input();
-            inputs[ 1 ].Type = 1; // KeyBoard = 1
+            inputs[ 1 ] = new Input {
+                Type = 1 // KeyBoard = 1
+            };
             inputs[ 1 ].ui.Keyboard.VirtualKey = (short)key;
             inputs[ 1 ].ui.Keyboard.ScanCode = (short)vsc;
             inputs[ 1 ].ui.Keyboard.Flags = KEYEVENTF_KEYUP;

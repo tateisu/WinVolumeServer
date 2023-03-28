@@ -81,7 +81,7 @@ namespace WinVolumeServer {
             var dstList = new List<String>();
             if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable()) {
                 var entry = Dns.GetHostEntry(Dns.GetHostName());
-                foreach (IPAddress ip in entry.AddressList) {
+                foreach (var ip in entry.AddressList) {
                     dstList.Add(ip.ToString());
                 }
             }

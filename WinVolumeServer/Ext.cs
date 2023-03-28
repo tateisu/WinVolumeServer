@@ -19,9 +19,7 @@ namespace WinVolumeServer {
             return provider.ComputeHash(input);
         }
 
-        public static String encodeBase64Url(this byte[] src) {
-            return UrlBase64.Encode(src);
-        }
+        public static String encodeBase64Url(this byte[] src) => UrlBase64.Encode( src );
 
         public static Task setStringResponse(this IHttpContext context, HttpStatusCode code, String message) {
             context.Response.StatusCode = (int)code;
@@ -33,8 +31,7 @@ namespace WinVolumeServer {
             return context.SendDataAsync(data);
         }
 
-        public static float clip(this float value,float min,float max) {
-            return Math.Max(min, Math.Min(max, value));
-        }
+        public static float clip(this float value, float min, float max) =>
+            Math.Max( min, Math.Min( max, value ) );
     }
 }

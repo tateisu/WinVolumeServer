@@ -4,6 +4,7 @@
 using CSCore.CoreAudioAPI;
 using System;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace WinVolumeServer {
     static class Volume {
@@ -13,11 +14,23 @@ namespace WinVolumeServer {
             return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
         }
 
+        private static readonly Regex reVoiceMeeter =
+            new Regex( @"\bvoicemeeter\b", RegexOptions.IgnoreCase );
+
         public static float? getVolume() {
             using var device = getCurrentDevice();
-            if (device == null) return null;
-            using var endpointVolume = AudioEndpointVolume.FromDevice(device);
-            if (endpointVolume == null) return null;
+            if (device == null) {
+                return null;
+            }
+            if (reVoiceMeeter.IsMatch( device.FriendlyName )) {
+                var v = Hub.voiceMeeter.getVolume();
+                if (v != null) {
+                    return v;
+                }
+            }
+            using var endpointVolume = AudioEndpointVolume.FromDevice( device );
+            if (endpointVolume == null)
+                return null;
             return endpointVolume.GetMasterVolumeLevel();
             //     Volume level in decibels. To get the range of volume levels obtained from this
             //     method, call the CSCore.CoreAudioAPI.AudioEndpointVolume.GetVolumeRange(System.Single@,System.Single@,System.Single@)
@@ -26,10 +39,16 @@ namespace WinVolumeServer {
         public static void setVolume(float newVolume) {
             using var device = getCurrentDevice();
             if (device == null) throw new InvalidOperationException("null GetDefaultAudioEndpoint");
+
+            if (reVoiceMeeter.IsMatch( device.FriendlyName )) {
+                if (Hub.voiceMeeter.setVolume( newVolume ))
+                    return;
+            }
+
             using var endpointVolume = AudioEndpointVolume.FromDevice(device);
             if (endpointVolume == null) throw new InvalidOperationException("null AudioEndpointVolume.FromDevice");
             try {
-                endpointVolume.GetVolumeRange(out float volumeMinDb, out float volumeMaxDb, out float volumeIncrementDB);
+                endpointVolume.GetVolumeRange(out var volumeMinDb, out var volumeMaxDb, out var volumeIncrementDB);
                 Debug.WriteLine( $"newVolume={newVolume}, volumeRange={volumeMinDb}…{volumeMaxDb}" );
                 newVolume = newVolume.clip(volumeMinDb, volumeMaxDb);
                 endpointVolume.SetMasterVolumeLevel(newVolume, Guid.Empty);
@@ -38,15 +57,7 @@ namespace WinVolumeServer {
             }
         }
 
-        private static AudioSessionManager2? GetDefaultAudioSessionManager2(DataFlow dataFlow) {
-            using var enumerator = new MMDeviceEnumerator();
-            using var device = enumerator.GetDefaultAudioEndpoint(dataFlow, Role.Multimedia);
-            Debug.WriteLine($"device.FriendlyName={device.FriendlyName}");
-            var sessionManager = AudioSessionManager2.FromMMDevice(device);
-            return sessionManager;
-        }
-
-        internal static string getDeviceName() {
+        internal static String getDeviceName() {
             try {
                 using var device = getCurrentDevice();
                 if (device == null) throw new InvalidOperationException("null GetDefaultAudioEndpoint");

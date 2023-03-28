@@ -16,12 +16,10 @@ namespace WinVolumeServer {
         public Task stringResponse(
             string message,
             HttpStatusCode statusCode = HttpStatusCode.InternalServerError
-        ) {
-            return HttpContext.setStringResponse(
+        ) => HttpContext.setStringResponse(
                 statusCode,
                 message
             );
-        }
 
         public Task checkPassword(Func<Task> block) {
             try {
@@ -32,7 +30,7 @@ namespace WinVolumeServer {
                     // リクエスト時刻をUnix time (ミリ秒単位)で
                     var timeString = headers[ "X-Password-Time" ];
                     var actualDigest = headers[ "X-Password-Digest" ];
-                    if (actualDigest == null || timeString == null || !long.TryParse( timeString, out long timeLong )) {
+                    if (actualDigest == null || timeString == null || !long.TryParse( timeString, out var timeLong )) {
                         return stringResponse( "missing password headers.", HttpStatusCode.BadRequest );
                     }
                     // 現在時刻をUnix time (ミリ秒単位)で
@@ -58,12 +56,13 @@ namespace WinVolumeServer {
             string arguments = ""
         ) {
             var lines = new List<string>();
-            ProcessStartInfo psInfo = new ProcessStartInfo();
-            psInfo.FileName = fileName;
-            psInfo.Arguments = arguments;
-            psInfo.CreateNoWindow = true;
-            psInfo.UseShellExecute = false;
-            psInfo.RedirectStandardOutput = true;
+            var psInfo = new ProcessStartInfo {
+                FileName = fileName,
+                Arguments = arguments,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
             var p = Process.Start( psInfo );
             while (true) {
                 var line = p.StandardOutput.ReadLine();

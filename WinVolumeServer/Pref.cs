@@ -9,6 +9,7 @@ namespace WinVolumeServer {
         private const string KEY_SERVER_PREFIX = "serverPrefix";
         private const string KEY_SERVER_ERROR = "serverError";
         private const string KEY_PASSWORD = "password";
+        private const string KEY_VOICE_MEETER_GAIN = "voiceMeeterGain";
 
         [UserScopedSetting()]
         [DefaultSettingValue("")]
@@ -30,5 +31,17 @@ namespace WinVolumeServer {
             get { return (string)this[KEY_PASSWORD]; }
             set { this[KEY_PASSWORD] = value; }
         }
+
+        [UserScopedSetting()]
+        [DefaultSettingValue( "" )]
+        public string voiceMeeterGain {
+            get {
+                return (string)this[ KEY_VOICE_MEETER_GAIN ];
+            }
+            set {
+                this[ KEY_VOICE_MEETER_GAIN ] = value;
+            }
+        }
+
     }
 }

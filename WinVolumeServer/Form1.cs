@@ -13,16 +13,22 @@ namespace WinVolumeServer {
             showContents();
         }
 
-        public void showContents() {
+        public void showContents(Boolean showVolume = true) {
             if (InvokeRequired) {
-                Invoke(new MethodInvoker(showContents));
+                Invoke( (MethodInvoker)delegate {
+                    showContents( showVolume );
+                } );
                 return;
             }
             tbServerPrefix.Text = Hub.pref.serverPrefix;
             tbServerError.Text = Hub.pref.serverError;
             tbPassword.Text = Hub.pref.password;
-            tbAudioDevice.Text = Volume.getDeviceName();
-            tbVolume.Text = Volume.getVolume()?.ToString() ?? "";
+            tbVoiceMeeterGain.Text = Hub.pref.voiceMeeterGain;
+
+            tbAudioDevice.Text = Volume.getDeviceName() +"\r\n" + Hub.voiceMeeter.deviceInfo();
+            if (showVolume) {
+                tbVolume.Text = Volume.getVolume()?.ToString() ?? "";
+            }
         }
 
         private void btnServerRestart_Click(object sender, System.EventArgs e) {
@@ -44,12 +50,18 @@ namespace WinVolumeServer {
             Hub.pref.Save();
         }
 
-        private void btnAudioDeviceCheck_Click(object sender, System.EventArgs e) {
-            showContents();
+        private void tbVoiceMeeterGain_TextChanged(object sender, EventArgs e) {
+            var text = tbVoiceMeeterGain.Text.Trim();
+            if (text == Hub.pref.voiceMeeterGain)
+                return;
+            Hub.pref.voiceMeeterGain = text;
+            Hub.pref.Save();
         }
 
+        private void btnAudioDeviceCheck_Click(object sender, System.EventArgs e) => showContents();
+
         private void btnVolume_Click(object sender, EventArgs e) {
-            if (!float.TryParse(tbVolume.Text, out float volumeFloat)) {
+            if (!float.TryParse(tbVolume.Text, out var volumeFloat)) {
                 MessageBox.Show(
                     "入力内容を数値として解釈できません",
                     "エラー",
@@ -68,7 +80,7 @@ namespace WinVolumeServer {
                     MessageBoxIcon.Error
                 );
             }
-            showContents();
+            showContents( false );
         }
     }
 }
