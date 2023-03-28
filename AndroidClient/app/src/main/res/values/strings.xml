@@ -20,4 +20,5 @@
     <string name="media_previous_track">Track previous</string>
     <string name="media_stop">Stop</string>
     <string name="kill_amazon_music">Stop Amazon Music</string>
+    <string name="volume_min_db">Minimum volume(dB)</string>
 </resources>

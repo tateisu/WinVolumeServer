@@ -19,4 +19,5 @@
     <string name="media_previous_track">前トラック</string>
     <string name="media_stop">停止</string>
     <string name="kill_amazon_music">Amazon Musicの終了</string>
+    <string name="volume_min_db">音量の下限(dB)</string>
 </resources>

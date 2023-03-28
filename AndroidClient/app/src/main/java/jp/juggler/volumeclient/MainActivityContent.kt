@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
@@ -47,6 +48,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -54,7 +56,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
-import jp.juggler.volumeclient.MainActivityViewModelImpl.Companion.seekBarPositionToVolumeDb
 import jp.juggler.volumeclient.ui.theme.TestJetpackComposeTheme
 import jp.juggler.volumeclient.utils.LogTag
 import jp.juggler.volumeclient.utils.SpacerH
@@ -105,6 +106,14 @@ fun MainActivityContent(
             modifier = Modifier
                 .background(MaterialTheme.colors.background),
             content = { paddingValues ->
+                var volumeMinDb by remember {
+                    mutableStateOf(
+                        viewModel.volumeMinDbFixedInt.toString()
+                    )
+                }
+                val volumeBarPos by viewModel.volumeBarPos.observeAsState()
+                val volumeDb by viewModel.volumeDb.observeAsState()
+
                 val ld = LocalLayoutDirection.current
                 Column(
                     modifier = Modifier
@@ -144,6 +153,8 @@ fun MainActivityContent(
                             val serverAddr by viewModel.serverAddr.observeAsState()
                             val serverPort by viewModel.serverPort.observeAsState()
                             val password by viewModel.password.observeAsState()
+
+
 
                             TextField(
                                 value = serverAddr ?: "",
@@ -201,6 +212,23 @@ fun MainActivityContent(
                                 colors = textFieldColors(
                                     textColor = MaterialTheme.colors.onBackground,
                                 )
+                            )
+
+                            Gap(4.dp)
+
+                            TextField(
+                                value = volumeMinDb,
+                                label = { Text(stringResource(R.string.volume_min_db)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                onValueChange = { text ->
+                                    volumeMinDb = text
+                                    viewModel.setVolumeMinDb(text)
+                                },
+                                colors = textFieldColors(
+                                    textColor = MaterialTheme.colors.onBackground,
+                                ),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
                             )
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -292,21 +320,13 @@ fun MainActivityContent(
                         }
                     }
 
-                    val volumeBarPos by viewModel.volumeBarPos.observeAsState()
-                    val volumeDb by viewModel.volumeDb.observeAsState()
-
                     Slider(
                         value = volumeBarPos ?: 0.5f,
                         onValueChange = {
                             viewModel.volumeBarPos.value = it
                         },
                         onValueChangeFinished = {
-                            val newDb =
-                                seekBarPositionToVolumeDb(viewModel.volumeBarPos.value ?: 0f)
-                            val oldDb = viewModel.volumeDb.value
-                            if (newDb != oldDb) {
-                                viewModel.setVolume(newDb)
-                            }
+                            viewModel.onVolumeSeekFinished()
                         },
                         modifier = Modifier
                             .height(48.dp)

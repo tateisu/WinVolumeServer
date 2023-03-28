@@ -29,8 +29,9 @@ namespace WinVolumeServer {
             using var endpointVolume = AudioEndpointVolume.FromDevice(device);
             if (endpointVolume == null) throw new InvalidOperationException("null AudioEndpointVolume.FromDevice");
             try {
-                endpointVolume.GetVolumeRange(out float volumeMinDB, out float volumeMaxDB, out float volumeIncrementDB);
-                newVolume = newVolume.clip(volumeMinDB, volumeMaxDB);
+                endpointVolume.GetVolumeRange(out float volumeMinDb, out float volumeMaxDb, out float volumeIncrementDB);
+                Debug.WriteLine( $"newVolume={newVolume}, volumeRange={volumeMinDb}…{volumeMaxDb}" );
+                newVolume = newVolume.clip(volumeMinDb, volumeMaxDb);
                 endpointVolume.SetMasterVolumeLevel(newVolume, Guid.Empty);
             }catch(Exception ex) {
                 Debug.WriteLine($"{ex.GetType().Name} {ex.Message} {device.FriendlyName}");

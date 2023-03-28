@@ -10,8 +10,12 @@ import jp.juggler.volumeclient.utils.EmptyScope
 import jp.juggler.volumeclient.utils.LogTag
 import jp.juggler.volumeclient.utils.StringResAndArgs
 import jp.juggler.volumeclient.utils.clip
+import jp.juggler.volumeclient.utils.setIfChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+
+private const val volumeMinDbDefault = 96
+private const val volumeMinDbClip = 10
 
 interface MainActivityViewModel {
     // tri-value: boolean or null
@@ -27,13 +31,22 @@ interface MainActivityViewModel {
     val deviceName: MutableLiveData<String>
     val showTitleBar: MutableLiveData<Boolean>
     val mediaError: LiveEvent<Throwable>
+    val volumeMinDb: MutableLiveData<Int>
 
-    fun postGetCurrentVolume()
-    fun setVolume(v: Float, callApi: Boolean = true)
+    val volumeMinDbFixedInt: Int
+        get() = (volumeMinDb.value?.takeIf { it >= volumeMinDbClip } ?: volumeMinDbDefault)
+
+    val volumeMinDbFixedFloat: Float
+        get() = volumeMinDbFixedInt.toFloat()
+
     fun addPreset(v: Float)
+    fun mediaControl(m: MediaControl)
+    fun onVolumeSeekFinished()
+    fun postGetCurrentVolume()
     fun removePreset(v: Float)
     fun setShowTitleBar(v: Boolean)
-    fun mediaControl(m: MediaControl)
+    fun setVolume(v: Float, callApi: Boolean = true)
+    fun setVolumeMinDb(text: String)
 }
 
 // Jetpack Compose のIDEプレビュー用
@@ -51,6 +64,7 @@ object MainActivityViewModelStub : MainActivityViewModel {
     override val presets = MutableLiveData(listOf(-30f, -15f, 0f))
     override val deviceName = MutableLiveData("device name")
     override val showTitleBar = MutableLiveData(true)
+    override val volumeMinDb = MutableLiveData(volumeMinDbDefault)
     override val mediaError = LiveEvent<Throwable>()
 
     override fun postGetCurrentVolume() = Unit
@@ -59,6 +73,8 @@ object MainActivityViewModelStub : MainActivityViewModel {
     override fun removePreset(v: Float) = Unit
     override fun setShowTitleBar(v: Boolean) = Unit
     override fun mediaControl(m: MediaControl) = Unit
+    override fun onVolumeSeekFinished() = Unit
+    override fun setVolumeMinDb(text: String) = Unit
 }
 
 // 実際の実装
@@ -75,19 +91,7 @@ class MainActivityViewModelImpl(
         const val keyPassword = "password"
         const val keyPresets = "presets"
         const val keyShowTitleBar = "showTitleBar"
-
-        const val minDb = 30f
-
-        // 0.5dB単位に丸める
-        // 範囲内にクリップする
-        fun Float.roundDb() =
-            (this * 2f).toInt().toFloat().times(0.5f).clip(-minDb, 0f)
-
-        fun seekBarPositionToVolumeDb(pos: Float) =
-            (pos - 1f).times(minDb).roundDb()
-
-        fun volumeDbToSeekBarPos(db: Float) =
-            db.roundDb().div(minDb) + 1f
+        const val keyVolumeMinDb = "volumeMinDb"
     }
 
     private val pref: SharedPreferences = context.getSharedPreferences(
@@ -106,6 +110,7 @@ class MainActivityViewModelImpl(
     override val presets = MutableLiveData<List<Float>>()
     override val deviceName = MutableLiveData<String>()
     override val showTitleBar = MutableLiveData(true)
+    override val volumeMinDb = MutableLiveData(volumeMinDbDefault)
     override val mediaError = LiveEvent<Throwable>()
     private var isCleared = false
 
@@ -147,6 +152,7 @@ class MainActivityViewModelImpl(
             ?.sorted()
             ?: emptyList()
         showTitleBar.value = pref.getBoolean(keyShowTitleBar, true)
+        volumeMinDb.value = pref.getInt(keyVolumeMinDb, volumeMinDbDefault)
     }
 
     fun save() {
@@ -175,6 +181,29 @@ class MainActivityViewModelImpl(
                 password.value
             )
         }
+    }
+
+    // 0.5dB単位に丸める
+    // 範囲内にクリップする
+    private fun Float.roundDb() =
+        (this * 2f).toInt().toFloat().times(0.5f).clip(-volumeMinDbFixedFloat, 0f)
+
+    private fun seekBarPositionToVolumeDb(pos: Float) =
+        (pos - 1f).times(volumeMinDbFixedFloat).roundDb()
+
+    private fun volumeDbToSeekBarPos(db: Float) =
+        db.roundDb().div(volumeMinDbFixedFloat) + 1f
+
+    override fun onVolumeSeekFinished() {
+        val newDb = seekBarPositionToVolumeDb(volumeBarPos.value ?: 0f)
+        val oldDb = volumeDb.value
+        if (newDb != oldDb) setVolume(newDb)
+    }
+
+    override fun setVolumeMinDb(text: String) {
+        val newMinDb = text.toIntOrNull()?.takeIf { it >= volumeMinDbClip } ?: return
+        volumeMinDb.setIfChanged(newMinDb)
+        volumeDb.value?.let { setVolume(it) }
     }
 
     override fun setVolume(v: Float, callApi: Boolean) {
@@ -220,4 +249,5 @@ class MainActivityViewModelImpl(
             updater.postMedia(m)
         }
     }
+
 }
