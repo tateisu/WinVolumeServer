@@ -14,33 +14,29 @@ namespace WinVolumeServer {
         [UserScopedSetting()]
         [DefaultSettingValue("")]
         public string serverError {
-            get { return (string)this[KEY_SERVER_ERROR]; }
-            set { this[KEY_SERVER_ERROR] = value; }
+            get => (string)this[ KEY_SERVER_ERROR ];
+            set => this[ KEY_SERVER_ERROR ] = value;
         }
 
         [UserScopedSetting()]
         [DefaultSettingValue("2021")]
         public string serverPrefix {
-            get { return (string)this[KEY_SERVER_PREFIX]; }
-            set { this[KEY_SERVER_PREFIX] = value; }
+            get => (string)this[ KEY_SERVER_PREFIX ];
+            set => this[ KEY_SERVER_PREFIX ] = value;
         }
 
         [UserScopedSetting()]
         [DefaultSettingValue("")]
         public string password {
-            get { return (string)this[KEY_PASSWORD]; }
-            set { this[KEY_PASSWORD] = value; }
+            get => (string)this[ KEY_PASSWORD ];
+            set => this[ KEY_PASSWORD ] = value;
         }
 
         [UserScopedSetting()]
         [DefaultSettingValue( "" )]
         public string voiceMeeterGain {
-            get {
-                return (string)this[ KEY_VOICE_MEETER_GAIN ];
-            }
-            set {
-                this[ KEY_VOICE_MEETER_GAIN ] = value;
-            }
+            get => (string)this[ KEY_VOICE_MEETER_GAIN ];
+            set => this[ KEY_VOICE_MEETER_GAIN ] = value;
         }
 
     }
