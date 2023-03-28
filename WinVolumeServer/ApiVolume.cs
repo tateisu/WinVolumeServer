@@ -22,6 +22,7 @@ namespace WinVolumeServer {
                     return stringResponse( "invalid parameter 'v'", HttpStatusCode.BadRequest );
                 }
                 Volume.setVolume( volumeFloat );
+                Hub.form1?.showVolume();
                 return createVolumeEntity();
             } );
 

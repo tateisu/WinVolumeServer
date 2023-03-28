@@ -13,10 +13,10 @@ namespace WinVolumeServer {
             showContents();
         }
 
-        public void showContents(Boolean showVolume = true) {
+        public void showContents() {
             if (InvokeRequired) {
                 Invoke( (MethodInvoker)delegate {
-                    showContents( showVolume );
+                    showContents();
                 } );
                 return;
             }
@@ -26,9 +26,17 @@ namespace WinVolumeServer {
             tbVoiceMeeterGain.Text = Hub.pref.voiceMeeterGain;
 
             tbAudioDevice.Text = Volume.getDeviceName() +"\r\n" + Hub.voiceMeeter.deviceInfo();
-            if (showVolume) {
-                tbVolume.Text = Volume.getVolume()?.ToString() ?? "";
+            showVolume();
+        }
+
+        public void showVolume() {
+            if (InvokeRequired) {
+                Invoke( (MethodInvoker)delegate {
+                    showVolume();
+                } );
+                return;
             }
+            tbVolume.Text = Volume.getVolume()?.ToString() ?? "";
         }
 
         private void btnServerRestart_Click(object sender, System.EventArgs e) {
@@ -58,7 +66,8 @@ namespace WinVolumeServer {
             Hub.pref.Save();
         }
 
-        private void btnAudioDeviceCheck_Click(object sender, System.EventArgs e) => showContents();
+        private void btnAudioDeviceCheck_Click(object sender, System.EventArgs e) =>
+            showContents();
 
         private void btnVolume_Click(object sender, EventArgs e) {
             if (!float.TryParse(tbVolume.Text, out var volumeFloat)) {
@@ -72,6 +81,7 @@ namespace WinVolumeServer {
             }
             try {
                 Volume.setVolume(volumeFloat);
+                showVolume();
             } catch (Exception ex) {
                 MessageBox.Show(
                     $"ボリュームの設定に失敗しました {ex.GetType().Name} {ex.Message}",
@@ -80,7 +90,6 @@ namespace WinVolumeServer {
                     MessageBoxIcon.Error
                 );
             }
-            showContents( false );
         }
     }
 }
