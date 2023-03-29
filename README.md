@@ -19,7 +19,7 @@ PCの音量をHTTP経由で制御したくなったので書いた。
 - 右クリック→設定で設定画面を開く
 - 右クリック→終了でアプリを終了する
 
-![image](https://user-images.githubusercontent.com/333944/138663828-4a92c18d-b23c-46e9-9fd4-e52702892cd5.png)
+![image](https://user-images.githubusercontent.com/333944/228392744-ee6d2328-5bfb-4ed7-948c-00f68b3aba03.png)
 
 ----
 ## WinVolumeclient app (for Android)
