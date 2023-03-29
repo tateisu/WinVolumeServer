@@ -47,7 +47,7 @@ WinVolumeServerにアクセスしてリモートで音量を制御するアプ�
 
 以下の条件を満たすとVoiceMeeterのスライダのdB値を直接変更する
 - サーバ側アプリがVoiceMeeterのインストール先を検出できる。
-- サーバ側アプリの「現在のオーディオ出力」の１行目に「VoiceMeeter」という単語が含まれる。
+- サーバ側アプリの「現在のオーディオ出力」の１行目に「VoiceMeeter」という単語が含まれる。(Windows OSのサウンド出力先がVoiceMeeterである)
 - サーバ側アプリの「VoiceMeeterのGainプロパティ」にスライダのプロパティ名が指定されている。
 
 ### 「VoiceMeeterのGainプロパティ」に指定するプロパティ名の調べ方
