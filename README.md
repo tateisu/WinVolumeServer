@@ -19,7 +19,7 @@ PCの音量をHTTP経由で制御したくなったので書いた。
 - 右クリック→設定で設定画面を開く
 - 右クリック→終了でアプリを終了する
 
-![image](https://user-images.githubusercontent.com/333944/138663828-4a92c18d-b23c-46e9-9fd4-e52702892cd5.png)
+![image](https://user-images.githubusercontent.com/333944/228392744-ee6d2328-5bfb-4ed7-948c-00f68b3aba03.png)
 
 ----
 ## WinVolumeclient app (for Android)
@@ -41,6 +41,25 @@ WinVolumeServerにアクセスしてリモートで音量を制御するアプ�
 - 正しければ「接続した。」が表示されて操作できる。
 
 ![image](https://user-images.githubusercontent.com/333944/138828874-76e4aefb-ec14-4890-95b7-c3baef87b110.png)
+
+----
+## VoiceMeeter 連動
+
+以下の条件を満たすとVoiceMeeterのスライダのdB値を直接変更する
+- サーバ側アプリがVoiceMeeterのインストール先を検出できる。
+- サーバ側アプリの「現在のオーディオ出力」の１行目に「VoiceMeeter」という単語が含まれる。(Windows OSのサウンド出力先がVoiceMeeterである)
+- サーバ側アプリの「VoiceMeeterのGainプロパティ」にスライダのプロパティ名が指定されている。
+
+### 「VoiceMeeterのGainプロパティ」に指定するプロパティ名の調べ方
+- VB側で目的の音量スライダを適当に動かして、他のスライダと区別できる数字にする。
+- WinVolumeServerのサーバ側アプリの「現在のオーディオ出力」の右上の「再取得」を押す。
+- 出力の内容に、その数字が出る行があるはず。
+- その行の左端の部分を「VoiceMeeterのGainプロパティ」に指定する。
+- 例：「Bus[0].Gain // -43 // Bus A1」の左端の「Bus[0].Gain」。
+
+### 補足
+- プロパティ名の詳細は https://github.com/vburel2018/Voicemeeter-SDK にあるPDFファイルを参照。
+- VBのスライダは下限-60dBと決まっているので、それより低い値を指定しても-60にクリップされる。
 
 ----
 ## API
