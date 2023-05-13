@@ -103,8 +103,7 @@ fun MainActivityContent(
                     )
                 }
             },
-            modifier = Modifier
-                .background(MaterialTheme.colors.background),
+            modifier = Modifier.background(MaterialTheme.colors.background),
             content = { paddingValues ->
                 var volumeMinDb by remember {
                     mutableStateOf(

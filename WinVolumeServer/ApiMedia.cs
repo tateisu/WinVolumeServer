@@ -114,10 +114,7 @@ namespace WinVolumeServer {
         }
 
         [Route( HttpVerbs.Post, "/" )]
-        public Task media(
-            [QueryField] string a,
-            [FormData] NameValueCollection form
-        ) => checkPassword( () => {
+        public Task media([QueryField] string a) => checkPassword( () => {
             Console.WriteLine( $"a={a}" );
             if (a == "killAmazonMusic") {
                 return killApp( new Regex( @"\AAmazon Music\.exe\s+(\d+)" ) );

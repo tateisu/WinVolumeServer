@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.hadilq.liveevent.LiveEvent
 import jp.juggler.volumeclient.utils.EmptyScope
 import jp.juggler.volumeclient.utils.LogTag
+import jp.juggler.volumeclient.utils.PrefMeta
 import jp.juggler.volumeclient.utils.StringResAndArgs
 import jp.juggler.volumeclient.utils.clip
 import jp.juggler.volumeclient.utils.setIfChanged
@@ -84,20 +85,8 @@ class MainActivityViewModelImpl(
     companion object {
         val log = LogTag("MainActivityViewModel")
         const val prefName = "pref"
-        const val keyDarkTheme = "darkTheme"
-        const val keyShowConnectionSettings = "showConnectionSettings"
-        const val keyServerAddr = "serverAddr"
-        const val keyServerPort = "serverPort"
-        const val keyPassword = "password"
-        const val keyPresets = "presets"
-        const val keyShowTitleBar = "showTitleBar"
-        const val keyVolumeMinDb = "volumeMinDb"
-    }
 
-    private val pref: SharedPreferences = context.getSharedPreferences(
-        prefName,
-        Context.MODE_PRIVATE
-    )
+    }
 
     override val darkTheme = MutableLiveData<Boolean>()
     override val showConnectionSettings = MutableLiveData<Boolean>()
@@ -130,47 +119,95 @@ class MainActivityViewModelImpl(
         }
     )
 
-    override fun onCleared() {
-        isCleared = true
-        super.onCleared()
-        EmptyScope.launch { updater.send(-1L) }
-    }
+    private val pref: SharedPreferences = context.getSharedPreferences(
+        prefName,
+        Context.MODE_PRIVATE
+    )
 
-    fun loadOrRestore() {
-        showConnectionSettings.value = pref.getBoolean(keyShowConnectionSettings, true)
-        darkTheme.value = when (pref.getInt(keyDarkTheme, -1)) {
-            -1 -> null
-            0 -> false
-            else -> true
-        }
-        serverAddr.value = pref.getString(keyServerAddr, "X.X.X.X")
-        serverPort.value = pref.getString(keyServerPort, "2021")
-        password.value = pref.getString(keyPassword, "")
-        presets.value = pref.getString(keyPresets, null)
-            ?.split("/")
-            ?.mapNotNull { it.toFloatOrNull() }
-            ?.sorted()
-            ?: emptyList()
-        showTitleBar.value = pref.getBoolean(keyShowTitleBar, true)
-        volumeMinDb.value = pref.getInt(keyVolumeMinDb, volumeMinDbDefault)
-    }
-
-    fun save() {
-        pref.edit()
-            .putBoolean(keyShowConnectionSettings, showConnectionSettings.value ?: true)
-            .putInt(
-                keyDarkTheme, when (darkTheme.value) {
+    private val prefMeta = arrayOf(
+        PrefMeta(
+            key = "showConnectionSettings",
+            defVal = true,
+            get = { showConnectionSettings.value },
+            set = { showConnectionSettings.value = it },
+        ),
+        PrefMeta(
+            key = "darkTheme",
+            defVal = -1,
+            get = {
+                when (darkTheme.value) {
                     null -> -1
                     false -> 0
                     true -> 1
                 }
-            )
-            .putString(keyServerAddr, serverAddr.value)
-            .putString(keyServerPort, serverPort.value)
-            .putString(keyPassword, password.value)
-            .putString(keyPresets, presets.value?.joinToString("/"))
-            .putBoolean(keyShowTitleBar, showTitleBar.value ?: true)
+            },
+            set = {
+                darkTheme.value = when (it) {
+                    -1 -> null
+                    0 -> false
+                    else -> true
+                }
+            },
+        ),
+        PrefMeta(
+            key = "serverAddr",
+            defVal = "X.X.X.X",
+            get = { serverAddr.value },
+            set = { serverAddr.value = it },
+        ),
+        PrefMeta(
+            key = "serverPort",
+            defVal = "2021",
+            get = { serverPort.value },
+            set = { serverPort.value = it },
+        ),
+        PrefMeta(
+            key = "password",
+            defVal = "",
+            get = { password.value },
+            set = { password.value = it },
+        ),
+        PrefMeta(
+            key = "presets",
+            defVal = "",
+            get = { presets.value?.joinToString("/") },
+            set = { text ->
+                presets.value = text
+                    .takeIf { it.isNotEmpty() }
+                    ?.split("/")
+                    ?.mapNotNull { it.toFloatOrNull() }
+                    ?.sorted()
+                    ?: emptyList()
+            },
+        ),
+        PrefMeta(
+            key = "showTitleBar",
+            defVal = true,
+            get = { showTitleBar.value },
+            set = { showTitleBar.value = it },
+        ),
+        PrefMeta(
+            key = "volumeMinDb",
+            defVal = volumeMinDbDefault,
+            get = { volumeMinDb.value },
+            set = { volumeMinDb.value = it },
+        )
+    )
+
+    fun loadOrRestore() {
+        prefMeta.forEach { it.loadFrom(pref) }
+    }
+
+    fun save() {
+        pref.edit()
+            .also { e -> prefMeta.forEach { it.saveTo(e) } }
             .apply()
+    }
+
+    override fun onCleared() {
+        isCleared = true
+        super.onCleared()
+        EmptyScope.launch { updater.send(-1L) }
     }
 
     override fun postGetCurrentVolume() {
@@ -249,5 +286,4 @@ class MainActivityViewModelImpl(
             updater.postMedia(m)
         }
     }
-
 }

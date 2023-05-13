@@ -13,7 +13,7 @@ namespace WinVolumeServer {
         public static Form1? form1;
 
         internal static void startServer() => 
-            httpServer.start( pref.serverPrefix );
+            httpServer.start( pref.serverPort);
 
         private static void closeForm() {
             form1?.Close();

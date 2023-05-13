@@ -20,7 +20,7 @@ namespace WinVolumeServer {
                 } );
                 return;
             }
-            tbServerPrefix.Text = Hub.pref.serverPrefix;
+            tbServerPort.Text = Hub.pref.serverPort;
             tbServerError.Text = Hub.pref.serverError;
             tbPassword.Text = Hub.pref.password;
             tbVoiceMeeterGain.Text = Hub.pref.voiceMeeterGain;
@@ -45,17 +45,15 @@ namespace WinVolumeServer {
         }
 
         private void tbServerPrefix_TextChanged(object sender, System.EventArgs e) {
-            var text = tbServerPrefix.Text.Trim();
-            if (text == Hub.pref.serverPrefix) return;
-            Hub.pref.serverPrefix = text;
-            Hub.pref.Save();
+            var text = tbServerPort.Text.Trim();
+            if (text == Hub.pref.serverPort) return;
+            Hub.pref.serverPort= text;
         }
 
         private void tbPassword_TextChanged(object sender, EventArgs e) {
             var text = tbPassword.Text.Trim();
             if (text == Hub.pref.password) return;
             Hub.pref.password = text;
-            Hub.pref.Save();
         }
 
         private void tbVoiceMeeterGain_TextChanged(object sender, EventArgs e) {
@@ -63,7 +61,6 @@ namespace WinVolumeServer {
             if (text == Hub.pref.voiceMeeterGain)
                 return;
             Hub.pref.voiceMeeterGain = text;
-            Hub.pref.Save();
         }
 
         private void btnAudioDeviceCheck_Click(object sender, System.EventArgs e) =>

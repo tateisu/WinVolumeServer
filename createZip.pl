@@ -10,8 +10,8 @@ system qq(./buildServer.bat) and die;
 # build AndroidClient
 {
 	my $dir =pushd("AndroidClient");
-	system qq(./gradlew.bat --console=plain clean) and die;
-	system qq(./gradlew.bat --console=plain assembleRelease) and die;
+	system qq(./gradlew --console=plain clean) and die;
+	system qq(./gradlew --console=plain assembleRelease) and die;
 }
 
 my @lt = localtime;
@@ -36,5 +36,5 @@ while (my $file = readdir $dh) {
 	);
 }
 
-system qq(zip -r $title.zip $title);
+system qq(zip -r _zip/$title.zip $title);
 system qq(rm -r $title);

@@ -4,11 +4,11 @@
 using EmbedIO;
 using EmbedIO.Actions;
 using EmbedIO.WebApi;
-using Swan.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Linq;
 
 namespace WinVolumeServer {
     class MyHttpServer {
@@ -68,12 +68,14 @@ namespace WinVolumeServer {
 
                 var addressList = getLocalAddresses();
                 addressList.Sort();
-                Hub.pref.serverError = "以下のアドレスで待機中です\r\n" + String.Join("\r\n", addressList);
-                Hub.pref.Save();
+                var addressListText = string.Join( 
+                    "", 
+                    addressList.Select( x => $"\r\n{x}" ).ToArray()
+                );
+                Hub.pref.serverError = $"{Resource1.listeningOn}{addressListText}";
             } catch (Exception ex) {
                 Debug.WriteLine(ex);
                 Hub.pref.serverError = $"{ex.GetType().Name} {ex.Message}";
-                Hub.pref.Save();
             }
         }
 

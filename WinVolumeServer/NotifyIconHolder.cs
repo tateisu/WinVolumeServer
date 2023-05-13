@@ -10,7 +10,7 @@ namespace WinVolumeServer {
     class NotifyIconHolder {
 
         private static ToolStripMenuItem createToolStripMenuItem(String text, EventHandler handler) {
-            ToolStripMenuItem toolStripMenuItem = new ToolStripMenuItem(text);
+            var toolStripMenuItem = new ToolStripMenuItem(text);
             toolStripMenuItem.Click += handler;
             return toolStripMenuItem;
         }
@@ -40,9 +40,9 @@ namespace WinVolumeServer {
                 this.notifyIcon = notifyIcon;
 
                 // コンテキストメニュー
-                ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
-                contextMenuStrip.Items.Add(createToolStripMenuItem("&設定", (sender, e) => Hub.onMenuConfig()));
-                contextMenuStrip.Items.Add(createToolStripMenuItem("&終了", (sender, e) => Hub.onMenuExit()));
+                var contextMenuStrip = new ContextMenuStrip();
+                contextMenuStrip.Items.Add(createToolStripMenuItem("&Settings", (sender, e) => Hub.onMenuConfig()));
+                contextMenuStrip.Items.Add(createToolStripMenuItem("&Exit", (sender, e) => Hub.onMenuExit()));
                 notifyIcon.ContextMenuStrip = contextMenuStrip;
             } catch (Exception ex) {
                 Debug.WriteLine(ex);
