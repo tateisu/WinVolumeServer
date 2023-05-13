@@ -27,7 +27,9 @@ namespace WinVolumeServer {
                 }
                 throw new NullReferenceException( "DeserializeObject returns null." );
             } catch (Exception ex) {
-                Console.WriteLine( $"json load failed. {path} {ex}" );
+                if (!( ex is FileNotFoundException )) {
+                    Console.WriteLine( $"json load failed. {path} {ex}" );
+                }
                 return new JObject();
             }
         }
@@ -59,12 +61,17 @@ namespace WinVolumeServer {
 
     public class Pref {
         private static String settingFileName() {
-            var appSettings = ConfigurationManager.OpenExeConfiguration(
-                    ConfigurationUserLevel.PerUserRoamingAndLocal
+            var appFolder = Path.Combine(
+                Environment.GetFolderPath(
+                    Environment.SpecialFolder.LocalApplicationData
+                ),
+                "WinVolumeServer"
             );
-            var dir = Path.GetDirectoryName( appSettings.FilePath );
-            Directory.CreateDirectory( dir );
-            return Path.Combine( dir, "appSetting.json" );
+            Directory.CreateDirectory( appFolder );
+            return Path.Combine(
+                appFolder,
+                "settings.json"
+            );
         }
 
         private readonly String filePath = settingFileName();
@@ -73,6 +80,7 @@ namespace WinVolumeServer {
         JObject ensureLoad() {
             var json = this.json;
             if (json == null) {
+                Console.WriteLine( $"prefFile {filePath}" );
                 json = filePath.loadJson();
                 this.json = json;
             }

@@ -1,5 +1,7 @@
 ﻿#nullable enable
+#pragma warning disable IDE0079
 #pragma warning disable IDE1006
+#pragma warning disable IDE0060
 
 using EmbedIO;
 using EmbedIO.Routing;
@@ -114,7 +116,7 @@ namespace WinVolumeServer {
         }
 
         [Route( HttpVerbs.Post, "/" )]
-        public Task media([QueryField] string a) => checkPassword( () => {
+        public Task media([QueryField] string a, [FormData] NameValueCollection form) => checkPassword( () => {
             Console.WriteLine( $"a={a}" );
             if (a == "killAmazonMusic") {
                 return killApp( new Regex( @"\AAmazon Music\.exe\s+(\d+)" ) );
